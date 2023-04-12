@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 # Each user has extra info associated with their account
 class UserInfo(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
     # user info
     preferred_name = models.CharField(max_length=25)
@@ -22,3 +22,8 @@ class Address(models.Model):
     city = models.CharField(max_length=20)
     address = models.CharField(max_length=20)
     zipcode = models.CharField(max_length=10)
+
+
+class Note(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    body = models.TextField()
