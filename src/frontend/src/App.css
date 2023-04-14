@@ -1,0 +1,49 @@
+.formSubmission > * {
+    margin: 20px 50px;
+}
+
+.formSubmission {
+    width: 80%;
+    margin: auto;
+}
+
+.editPage {
+    margin: 20px;
+}
+
+.red {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: .875em;
+    color: #d9534f;
+}
+
+.red-border {
+    border: 1px solid #d9534f;
+}
+
+.hidden {
+    display: none;
+}
+
+#btn-logout {
+    background-color: transparent;
+    color: #A9A9A9;
+    border: none;
+}
+
+.center > * {
+    text-align: center;
+    margin: 20px auto;
+}
+
+.center_cards > * {
+    text-align: center;
+    margin: 10px 10px;
+}
+
+.centers {
+text-align: center;
+margin: 20px auto;
+}

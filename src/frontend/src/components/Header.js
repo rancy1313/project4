@@ -21,7 +21,10 @@ const Header = () => {
                                 <Nav.Link as={Link} to="/logout" >Logout</Nav.Link>
                             </>
                         ): (
-                            <Nav.Link as={Link} to="/login" >Login</Nav.Link>
+                            <>
+                                <Nav.Link as={Link} to="/login" >Login</Nav.Link>
+                                <Nav.Link as={Link} to="/signup" >Sign Up</Nav.Link>
+                            </>
                         )}
                     </Nav>
                 </Container>
