@@ -14,7 +14,6 @@ urlpatterns = [
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    path("username-validation/", views.username_validation),
-    path("phone-number-validation/", views.username_validation),
     path("validate-unique-fields/", views.validate_unique_fields),
+    path("submit-user-form/", views.submit_user_form),
 ]

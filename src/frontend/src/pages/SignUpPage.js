@@ -8,17 +8,21 @@ import Form from 'react-bootstrap/Form';
 import { Multiselect } from "multiselect-react-dropdown";
 import Button from 'react-bootstrap/Button';
 
-const secret = 'superSecret';
+import Input from 'react-phone-number-input/input'
+
+import { useNavigate } from 'react-router-dom'
+
 
 function SignUpPage() {
 
     // set the available allergies to pass in the bootstrap selector
     const allergies = ['Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans', 'Sesame']
 
-
     // used to trigger handleSubmit
     const [formValidation, setFormValidation] = useState(0);
 
+    // navigate to login page if form was submitted successfully
+    let navigate = useNavigate()
 
     // set the date of birth value here to preset the date of birth option to current date
     var dateObj = new Date();
@@ -31,7 +35,7 @@ function SignUpPage() {
 
 
     // we have a base form set that will hold all the information from the user to send to the backend when completed
-    const [form, setForm] = useState({'dob': newDate, 'name': '', 'username': '', 'password': '',
+    const [form, setForm] = useState({'dob': newDate, 'preferred_name': '', 'username': '', 'password': '',
                                       'confirm_password': '', 'allergies': ['None'], 'phone_number': '',
                                       'user_addresses': {'delivery_address1': {'address_name': '', 'city': '',
                                       'address': '', 'zipcode': ''}}});
@@ -78,11 +82,8 @@ function SignUpPage() {
         }
     }
 
-
     // only addresses that were saved by the user will be sent to the backend
     const [saved_addresses, setSaved_addresses] = useState([]);
-
-
 
     function setPhoneNumber(value) {
 
@@ -352,38 +353,33 @@ function SignUpPage() {
         }
     }
 
+    // this is to calculate the user's age based on the inputed date
+    function getAge(userBirthday) {
+
+        // get the current day
+        let today = new Date();
+        // get the day of the birthday
+        let birthDay = new Date(userBirthday);
+        // calculate the difference in months
+        let months = today.getMonth() - birthDay.getMonth();
+        // calculate the difference in years
+        let calculatedAge = today.getFullYear() - birthDay.getFullYear();
+
+        // check if we need to subtract a year to give accurate age because subtracting by year doesn't take months into account
+        if ((birthDay.getDate() > today.getDate() && months === 0) || (months < 0)) {
+            calculatedAge--;
+        }
+
+        return calculatedAge;
+    }
+
     // split it so that it calls two functions and then for user/pass
     // always call handle submit
     async function fetchData() {
 
-        // this dict is used to pass backend data to validate the form
-        //const backend_dict = {'username_request': '', 'phone_number_request': ''}
-
         let encoded_username = btoa(form.username)
 
         let encoded_phone_number = btoa(form.phone_number)
-        /*
-        const username_request = await fetch("http://127.0.0.1:8000/api/username-validation/", {
-                                             method: "POST",
-                                             headers: {
-                                                'Content-Type': 'application/json'
-                                            },
-                                            body: JSON.stringify(encoded_username)});
-
-        // update value in the backend dict that gets passed to validate form
-        backend_dict.username_request = await username_request.json();
-
-        // do backend check to make sure phone_number is not taken
-        const phone_number_request = await fetch("http://127.0.0.1:8000/api/phone-number-validation/", {
-                                                 method: "POST",
-                                                 headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify(encoded_phone_number)})
-
-        // update value in the backend dict that gets passed to validate form
-        backend_dict.phone_number_request = await phone_number_request.json();*/
-
 
         // do backend check to make sure phone_number is not taken
         const unique_field_request = await fetch("http://127.0.0.1:8000/api/validate-unique-fields/", {
@@ -396,10 +392,8 @@ function SignUpPage() {
         let data = await unique_field_request.json();
         // validate the form to see if there are any errors.
         // pass backend response to throw errors if needed
-        //const formErrors = validateForm(backend_dict)
-        //handleSubmit(formErrors);
-        console.log(data)
-
+        const formErrors = validateForm(data);
+        handleSubmit(formErrors);
     }
 
     // useEffect will be used to validate the form on the backend for username/phone number
@@ -413,6 +407,137 @@ function SignUpPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formValidation])
 
+    // this function is to validate the form when the user tries to submit all their info
+    const validateForm = ({ username_request, phone_number_request }) => {
+
+        // get certain fields from the form to check if there are any errors
+        const { dob, preferred_name, username, password, confirm_password, phone_number, user_addresses } = form;
+        const newErrors = {};
+
+        // if user less than 18 years of age throw error b/c user is too young
+        if (getAge(dob) < 18) {
+            newErrors.dob = 'You need to be at least 18 years old.';
+        }
+
+        // name cannot be null
+        if (preferred_name === '') {
+            newErrors.preferred_name = 'Please enter a preferred name.';
+        }
+
+        // username cannot be null
+        if (username === '') {
+            newErrors.username = 'Please enter a username.';
+        } else {
+            // we do not want to pass an empty string in our username var or 404
+            // check if username is already taken
+            if (username_request === 'Found') {
+                newErrors.username = 'Username is already taken.';
+            }
+        }
+
+        // password must be at least 8 chars
+        if (password.length < 8) {
+            newErrors.password = 'Password is must be minimum 8 characters.';
+        }
+
+        // password and confirm password must match
+        if (password !== confirm_password) {
+            newErrors.confirm_password = 'Passwords must match.';
+        }
+
+        // phone number must be at least 12 digits
+        if (phone_number.length > 0 && phone_number.length < 12) {
+            newErrors.phone_number = 'Phone number is too short.';
+        } else if (phone_number.length === 0) {
+            // phone number cannot be null
+            newErrors.phone_number = 'Please enter a phone number.';
+        } else {
+            // phone numbers should be unique for all users
+            if (phone_number_request === 'Found') {
+                newErrors.phone_number = 'Phone number is already taken.';
+            }
+        }
+
+        /*
+           I am deleting any addresses that were not specifically saved by the user. If the
+           the user filled in all the fields in the delivery address form then no errors
+           will get triggered, and the address will be saved. However, I only want to store
+           addresses the user specifically chose to save.
+        */
+        // We only do this if there are no errors because this will delete the current form
+        // since the current form is always temporary and never saved
+        const tmp = form.user_addresses;
+
+        if (Object.keys(newErrors).length === 0) {
+            for (const key in user_addresses) {
+                if (!(saved_addresses.includes(key))) {
+                    delete tmp[key];
+                    setForm({
+                        ...form,
+                        'user_addresses':tmp
+                    })
+                }
+            }
+        }
+
+        return newErrors;
+    }
+
+    function handleSubmit(formErrors) {
+
+        // if formErrors errors keys are greater than 0 then there are errors and can't submit form
+        if (Object.keys(formErrors).length > 0) {
+            setErrors(formErrors);
+
+        } else {
+            // make a copy of the form because I want to encrypt the data
+            // it is easier to encrypt a copy then to use the useState functions on the form
+            //var copy_form = {...form};
+            var copy_form = {"user_addresses": {}, "allergies": []};
+
+            // encrypt all fields except user addresses because we encrypt what is inside of that field
+            // not the field itself
+            Object.keys(form).forEach(function(key, index) {
+                if (key !== "user_addresses" && key !== "allergies" && key !== "confirm_password")
+                    copy_form[key] = btoa(form[key]);
+            });
+
+            // encrypt allergies separately
+            for (var i = 0; i < form.allergies.length; i++)
+                copy_form.allergies.push(btoa(form.allergies[i]))
+
+            // loop through the addresses
+            Object.keys(form.user_addresses).forEach(function(key1, index1) {
+                // add an empty object for each address in for to append the data of that address
+                copy_form.user_addresses[key1] = {}
+                // loop through every field and add the data to the copy form address
+                Object.keys(form.user_addresses[key1]).forEach(function(key2, index2) {
+                    copy_form.user_addresses[key1][key2] = btoa(form.user_addresses[key1][key2]);
+                });
+            });
+
+            // loop through the user addresses
+            for (var address in form.user_addresses) {
+                // loop through the fields inside the user addresses and encrypt them
+                for (var field in copy_form.user_addresses[address]) {
+                    copy_form.user_addresses[address][field] = btoa(form.user_addresses[address][field])
+                }
+            }
+
+            // we send encrypted copy form to the back end
+            const unique_field_request = fetch("http://127.0.0.1:8000/api/submit-user-form/", {
+                                                 method: "POST",
+                                                 headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify(copy_form)})
+            // we navigate to the login page
+            //navigate("/login")
+
+            // check if there was any issues with the back end and navigate to /sign_up again to refresh page
+        }
+    }
+
     return (
     <>
         <h1>Hello world</h1>
@@ -421,12 +546,12 @@ function SignUpPage() {
                 <Form.Label>Preferred Name</Form.Label>
                 <Form.Control
                     type='text'
-                    value={form.name}
-                    onChange={(e) => setField('name', e.target.value)}
-                    isInvalid={!!errors.name}
+                    value={form.preferred_name}
+                    onChange={(e) => setField('preferred_name', e.target.value)}
+                    isInvalid={!!errors.preferred_name}
                 ></Form.Control>
                 <Form.Control.Feedback type='invalid'>
-                    { errors.name }
+                    { errors.preferred_name }
                 </Form.Control.Feedback>
             </Form.Group>
             <Form.Group controlId='username'>
@@ -479,11 +604,13 @@ function SignUpPage() {
             </Form.Group>
             <Form.Group controlId='phone_number'>
                 <Form.Label>Phone Number</Form.Label>
-                <PhoneInput
-                  defaultCountry="US"
-                  placeholder="Enter phone number"
-                  value={form.phone_number}
-                  onChange={setPhoneNumber}/>
+                <br />
+                <Input
+                    country="US"
+                    international
+                    withCountryCallingCode
+                    value={form.phone_number}
+                    onChange={setPhoneNumber}/>
                 <Form.Control
                   isInvalid={!!errors.phone_number}
                   hidden
@@ -492,6 +619,7 @@ function SignUpPage() {
                     { errors.phone_number }
                 </Form.Control.Feedback>
             </Form.Group>
+
 
             { (Object.keys(form.user_addresses).length > 1) ? (
                 getAddresses().map(function(address, index) {

@@ -51,25 +51,6 @@ def getNotes(request):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
-def username_validation(request):
-    data = request.data
-    print('username_validation:', data)
-    decoded_username = base64.b64decode(data).decode("utf-8")
-    print("decoded_username", decoded_username)
-
-    return Response({'zero': 0})
-
-
-@api_view(['POST'])
-def phone_number_validation(request):
-    data = request.data
-    print('phone_number_validation:', data)
-    decoded_phone_number = base64.b64decode(data).decode("utf-8")
-    print("decoded_phone_number", decoded_phone_number)
-    return Response({'zero': 0})
-
-
 # username/phone number are unique fields, so we check them when
 # a user is submitting a form on registration
 @api_view(['POST'])
@@ -94,3 +75,23 @@ def validate_unique_fields(request):
         validation_results['phone_number_request'] = "Found"
 
     return Response(validation_results)
+
+
+@api_view(['POST'])
+def submit_user_form(request):
+    print('submit_user_form:', request.data)
+    for data in request.data:
+        if data != "allergies" and data != "user_addresses":
+            tmp = base64.b64decode(request.data[data]).decode("utf-8")
+            print("tmp", tmp)
+
+    for allergy in request.data["allergies"]:
+        tmp = base64.b64decode(allergy).decode("utf-8")
+        print("allergy", tmp)
+
+    for address in request.data["user_addresses"]:
+        for field in request.data["user_addresses"][address]:
+            tmp = base64.b64decode(request.data["user_addresses"][address][field]).decode("utf-8")
+            print(tmp)
+
+    return Response({'zero': 0})
