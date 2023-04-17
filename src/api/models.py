@@ -21,25 +21,34 @@ class UserInfo(models.Model):
         numbers (0-9), period (.), apostrophe ('), hyphen/dash (-), and spaces.
         No other characters are allowed.
     """
-
     def clean_preferred_name(self):
-        restricted_chars = "`~!@#$%^&*()_=+,;:\|][{}/?><]\""
-        restricted_chars = set(list(restricted_chars))
-        if len(restricted_chars) != len(set(list(self.preferred_name))):
+        # make a set of the restricted chars
+        restricted_chars = set("`~!@#$%^&*()_=+,;:\|][{}/?><]\"")
+
+        # if the length of the difference is lower than the length of the restricted chars set,
+        # then that means there are restricted chars in that field
+        if len(restricted_chars - set(self.preferred_name)) < len(restricted_chars):
             raise ValidationError("No special chars are allowed besides period (.), hyphen/dash (-),"
                                   " apostrophe ('), and spaces.")
 
+    # we check type error and if the user is under 18
     def clean_dob(self):
         try:
+            # calculate age
             min_age = 18
             birthdate = datetime.datetime.strptime(self.dob, '%Y-%m-%d')
             today = datetime.datetime.now()
             age = (today - birthdate).days // 365
+
+            # if age lower that minimum age raise error
             if age < min_age:
                 raise ValidationError("Must be at least 18 years old to register")
+
         except ValueError and TypeError:
+            # user cannot format the date wrong or have it be of wrong type
             raise ValidationError("Please enter age in Year-Month-Day format.")
 
+    # make sure the submitted allergies are from the ones saved in our frontend options
     def clean_allergies(self):
         allergies = {'Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans',
                      'Sesame'}
@@ -61,6 +70,8 @@ class Address(models.Model):
     city = models.CharField(max_length=20)
     address = models.CharField(max_length=20)
     zipcode = models.CharField(max_length=10)
+
+    # still investigating address cleaning
 
 
 class Note(models.Model):

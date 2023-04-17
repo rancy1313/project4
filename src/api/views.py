@@ -13,6 +13,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import NoteSerializer
 from .models import Note
 
+from django.db.utils import IntegrityError
+
+from .utils import user_data_backend_validation
+
 import base64
 
 
@@ -55,7 +59,6 @@ def getNotes(request):
 # a user is submitting a form on registration
 @api_view(['POST'])
 def validate_unique_fields(request):
-
     # collect results from filtering
     validation_results = {"username_request": "", "phone_number_request": ""}
 
@@ -79,19 +82,44 @@ def validate_unique_fields(request):
 
 @api_view(['POST'])
 def submit_user_form(request):
-    print('submit_user_form:', request.data)
+    user_info_form = {}
     for data in request.data:
         if data != "allergies" and data != "user_addresses":
             tmp = base64.b64decode(request.data[data]).decode("utf-8")
-            print("tmp", tmp)
+            user_info_form[data] = tmp
 
+    user_info_form["allergies"] = []
     for allergy in request.data["allergies"]:
         tmp = base64.b64decode(allergy).decode("utf-8")
-        print("allergy", tmp)
+        user_info_form["allergies"].append(tmp)
 
+    user_info_form["allergies"] = "/".join(user_info_form["allergies"])
+
+    user_addresses_form = {}
+    user_addresses_form["user_addresses"] = {}
     for address in request.data["user_addresses"]:
+        user_addresses_form["user_addresses"][address] = {}
         for field in request.data["user_addresses"][address]:
             tmp = base64.b64decode(request.data["user_addresses"][address][field]).decode("utf-8")
-            print(tmp)
+            user_addresses_form["user_addresses"][address][field] = tmp
 
-    return Response({'zero': 0})
+    print(user_info_form)
+    print(user_addresses_form)
+
+    errors = user_data_backend_validation(user_info_form)
+
+    if errors:
+        return Response(errors)
+    else:
+        user = User.objects.create(username=user_info_form['username'], password=user_info_form['password'])
+        return Response({"success": "No errors detected."})
+
+"""
+def createNote(request):
+    data = request.data
+    note = Note.objects.create(
+        body=data['body']
+    )
+    serializer = NoteSerializer(note, many=False)
+    return Response(serializer.data)
+"""

@@ -538,6 +538,24 @@ function SignUpPage() {
         }
     }
 
+    async function testCalls(e) {
+        e.preventDefault();
+        var test_form = {'dob': btoa("2000-04-13"), 'preferred_name': btoa('test'), 'username': btoa('jnkddx'),
+                                      'password': btoa('password'),
+                                      'allergies': [btoa('Milk')], 'phone_number': btoa('+14566547878'),
+                                      'user_addresses': {}
+                         }
+        const test = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
+                                                 method: "POST",
+                                                 headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify(test_form)})
+        let data = await test.json();
+
+        console.log(data)
+    }
+
     return (
     <>
         <h1>Hello world</h1>
@@ -704,6 +722,11 @@ function SignUpPage() {
                     className='my-2'
                     variant='primary'>Sign Up</Button>
             </Form.Group>
+            <Button
+                    type='submit'
+                    onClick={testCalls}
+                    className='my-2'
+                    variant='primary'>test</Button>
         </Form>
     </>
     );
