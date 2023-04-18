@@ -540,9 +540,9 @@ function SignUpPage() {
 
     async function testCalls(e) {
         e.preventDefault();
-        var test_form = {'dob': btoa("2000-04-13"), 'preferred_name': btoa('test'), 'username': btoa('jnkddx'),
-                                      'password': btoa('password'),
-                                      'allergies': [btoa('Milk')], 'phone_number': btoa('+14566547878'),
+        var test_form = {'dob': btoa("200ghh0-04-13"), 'preferred_name': btoa('test'), 'username': btoa('jbddx'),
+                                      'password': btoa('787hHJjshn*78'),
+                                      'allergies': [btoa('Dog')], 'phone_number': btoa('+14566547878'),
                                       'user_addresses': {}
                          }
         const test = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {

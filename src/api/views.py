@@ -13,9 +13,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import NoteSerializer
 from .models import Note
 
-from django.db.utils import IntegrityError
-
-from .utils import user_data_backend_validation
+from .utils import user_data_backend_validation, is_base64_encoded
 
 import base64
 
@@ -80,46 +78,69 @@ def validate_unique_fields(request):
     return Response(validation_results)
 
 
+# this function handles the user form from registration when the front end has checked it for errors
 @api_view(['POST'])
 def submit_user_form(request):
+    # create a user info dictionary to hold the decoded data from the user
     user_info_form = {}
+
+    # loop through the data, decode it, and save it to the user info dict
     for data in request.data:
+
+        # allergies and user addresses are decoded differently
         if data != "allergies" and data != "user_addresses":
-            tmp = base64.b64decode(request.data[data]).decode("utf-8")
-            user_info_form[data] = tmp
 
+            # all data is encoded base 64 when sent to the back end, so we reject any data that is not base 64 encoded
+            if not is_base64_encoded(request.data[data]):
+                return Response({"error": "Submitted data was rejected."})
+
+            decoded_data = base64.b64decode(request.data[data]).decode("utf-8")
+            user_info_form[data] = decoded_data
+
+    # the allergies' field holds a list of allergies, we set it equal to an empty list to append the decoded data
     user_info_form["allergies"] = []
-    for allergy in request.data["allergies"]:
-        tmp = base64.b64decode(allergy).decode("utf-8")
-        user_info_form["allergies"].append(tmp)
 
+    # loop the allergies field and decode it and append it to the user info dict under allergies
+    for allergy in request.data["allergies"]:
+
+        # all data is encoded base 64 when sent to the back end, so we reject any data that is not base 64 encoded
+        if not is_base64_encoded(allergy):
+            return Response({"error": "Submitted data was rejected."})
+
+        decoded_data = base64.b64decode(allergy).decode("utf-8")
+        user_info_form["allergies"].append(decoded_data)
+
+    # we join the list of allergies because we are saving it as one string in the database
     user_info_form["allergies"] = "/".join(user_info_form["allergies"])
 
-    user_addresses_form = {}
-    user_addresses_form["user_addresses"] = {}
+    # user addresses are saved in a different dictionary from user info because
+    # user addresses are created from a different model
+    user_addresses_form = {"user_addresses": {}}
+
+    # loop through data in the user_addresses to decode it and save it to the user_addresses dict
     for address in request.data["user_addresses"]:
+
+        # set each address in user_addresses to an empty dict to collect the data for the address fields
         user_addresses_form["user_addresses"][address] = {}
+
         for field in request.data["user_addresses"][address]:
-            tmp = base64.b64decode(request.data["user_addresses"][address][field]).decode("utf-8")
-            user_addresses_form["user_addresses"][address][field] = tmp
 
-    print(user_info_form)
-    print(user_addresses_form)
+            # all data is encoded base 64 when sent to the back end, so we reject any data that is not base 64 encoded
+            if not is_base64_encoded(request.data["user_addresses"][address][field]):
+                return Response({"error": "Submitted data was rejected."})
 
+            decoded_data = base64.b64decode(request.data["user_addresses"][address][field]).decode("utf-8")
+            user_addresses_form["user_addresses"][address][field] = decoded_data
+
+    # pass user_info_form to user_data_backend_validation to see if there are any errors in the data
     errors = user_data_backend_validation(user_info_form)
 
+    # check errors in user_addresses_form
+
+    # if there are errors return the errors toi the front end to let the user know
     if errors:
         return Response(errors)
     else:
+        # else create user and direct user to login page on front end
         user = User.objects.create(username=user_info_form['username'], password=user_info_form['password'])
         return Response({"success": "No errors detected."})
-
-"""
-def createNote(request):
-    data = request.data
-    note = Note.objects.create(
-        body=data['body']
-    )
-    serializer = NoteSerializer(note, many=False)
-    return Response(serializer.data)
-"""
