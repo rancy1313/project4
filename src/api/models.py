@@ -27,8 +27,6 @@ class Address(models.Model):
     address = models.CharField(max_length=20)
     zipcode = models.CharField(max_length=10)
 
-    # still investigating address cleaning
-
 
 class Note(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

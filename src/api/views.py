@@ -92,6 +92,7 @@ def submit_user_form(request):
 
             # all data is encoded base 64 when sent to the back end, so we reject any data that is not base 64 encoded
             if not is_base64_encoded(request.data[data]):
+
                 return Response({"error": "Submitted data was rejected."})
 
             decoded_data = base64.b64decode(request.data[data]).decode("utf-8")
@@ -109,9 +110,6 @@ def submit_user_form(request):
 
         decoded_data = base64.b64decode(allergy).decode("utf-8")
         user_info_form["allergies"].append(decoded_data)
-
-    # we join the list of allergies because we are saving it as one string in the database
-    user_info_form["allergies"] = "/".join(user_info_form["allergies"])
 
     # user addresses are saved in a different dictionary from user info because
     # user addresses are created from a different model
@@ -136,6 +134,9 @@ def submit_user_form(request):
     errors = user_data_backend_validation(user_info_form)
 
     # check errors in user_addresses_form
+
+    # we join the list of allergies because we are saving it as one string in the database
+    user_info_form["allergies"] = "/".join(user_info_form["allergies"])
 
     # if there are errors return the errors toi the front end to let the user know
     if errors:

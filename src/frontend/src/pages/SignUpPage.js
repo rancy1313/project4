@@ -427,22 +427,95 @@ function SignUpPage() {
         // username cannot be null
         if (username === '') {
             newErrors.username = 'Please enter a username.';
-        } else {
-            // we do not want to pass an empty string in our username var or 404
-            // check if username is already taken
-            if (username_request === 'Found') {
-                newErrors.username = 'Username is already taken.';
-            }
         }
 
-        // password must be at least 8 chars
-        if (password.length < 8) {
-            newErrors.password = 'Password is must be minimum 8 characters.';
+        // check if username is already taken
+        if (username_request === 'Found') {
+            newErrors.username = 'Username is already taken.';
+        }
+
+        // password must be at least 8 chars and at most 25 chars
+        if (8 < password.length < 25) {
+            // this is the first error checked, we can just initialize it
+            newErrors.password = ['Be between 8 and 25 characters.']
         }
 
         // password and confirm password must match
         if (password !== confirm_password) {
             newErrors.confirm_password = 'Passwords must match.';
+        }
+
+        // make sure password has at least 1 lower case letter
+        if (!/[a-z]/.test(password)) {
+            // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
+            if (newErrors.password)
+                newErrors.password.push('Contain 1 lower case letter.');
+            else {
+                newErrors.password = ['Contain 1 lower case letter.']
+            }
+
+        }
+
+        // calculate difference to see if no special chars were used
+        const acceptable_chars = "'$%^&*-_+=~`|/,.;:\"'{}[]()!@".split("")
+        const password_set = password.split("")
+        var diff = acceptable_chars.filter(char => !password.includes(char));
+
+        // acceptable $%^&*-_+=~`|/,.;:"'{}[]()!@
+        // if the diff is 29 then no special chars were used
+        if (diff.length === 29) {
+            // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
+            if (newErrors.password)
+                newErrors.password.push('Contain one of the following chars ($%^&*-_+=~`|/,.;:\"\'{}[]()!@.).');
+            else {
+                newErrors.password = ['Contain one of the following chars ($%^&*-_+=~`|/,.;:\"\'{}[]()!@.).']
+            }
+        }
+
+        // I am restricting these chars for now more for testing purposes
+        // until I research a bit more on data sanitization
+        const restricted_chars = "<>?#\\-.@".split("")
+        diff = restricted_chars.filter(char => !password.includes(char));
+
+        // Still researching which chars to restrict. For now, these are some placeholders.
+        // restricted <>?#-.@\
+        if (diff.length !== 8) {
+            // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
+            if (newErrors.password)
+                newErrors.password.push('Restricted char detected.');
+            else {
+                newErrors.password = ['Restricted char detected.']
+            }
+        }
+
+        // make sure password has at least 1 capital letter
+        if (!/[A-Z]/.test(password)) {
+            // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
+            if (newErrors.password)
+                newErrors.password.push('Contain 1 capital letter.');
+            else {
+                newErrors.password = ['Contain 1 capital letter.']
+            }
+        }
+
+        // make sure password has at least 1 digit
+        if (!/[0-9]/.test(password)) {
+            // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
+            if (newErrors.password)
+                newErrors.password.push('Contain 1 digit.');
+            else {
+                newErrors.password = ['Contain 1 digit.']
+            }
+        }
+
+        // check for spaces in the password
+        if (password.indexOf(' ') >= 0) {
+            // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
+            if (newErrors.password)
+                newErrors.password.push('Not contain spaces.');
+            else {
+                newErrors.password = ['Not contain spaces.']
+            }
         }
 
         // phone number must be at least 12 digits
@@ -483,7 +556,7 @@ function SignUpPage() {
         return newErrors;
     }
 
-    function handleSubmit(formErrors) {
+    async function handleSubmit(formErrors) {
 
         // if formErrors errors keys are greater than 0 then there are errors and can't submit form
         if (Object.keys(formErrors).length > 0) {
@@ -492,7 +565,6 @@ function SignUpPage() {
         } else {
             // make a copy of the form because I want to encrypt the data
             // it is easier to encrypt a copy then to use the useState functions on the form
-            //var copy_form = {...form};
             var copy_form = {"user_addresses": {}, "allergies": []};
 
             // encrypt all fields except user addresses because we encrypt what is inside of that field
@@ -525,12 +597,16 @@ function SignUpPage() {
             }
 
             // we send encrypted copy form to the back end
-            const unique_field_request = fetch("http://127.0.0.1:8000/api/submit-user-form/", {
+            const unique_field_request = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
                                                  method: "POST",
                                                  headers: {
                                                     'Content-Type': 'application/json'
                                                 },
                                                 body: JSON.stringify(copy_form)})
+
+            let data = await unique_field_request.json();
+
+            console.log(data)
             // we navigate to the login page
             //navigate("/login")
 
@@ -538,13 +614,15 @@ function SignUpPage() {
         }
     }
 
+    // a test function to validate data on the back end
     async function testCalls(e) {
         e.preventDefault();
-        var test_form = {'dob': btoa("200ghh0-04-13"), 'preferred_name': btoa('test'), 'username': btoa('jbddx'),
-                                      'password': btoa('787hHJjshn*78'),
-                                      'allergies': [btoa('Dog')], 'phone_number': btoa('+14566547878'),
+        var test_form = {'dob': btoa("2000-04-13"), 'preferred_name': btoa('teshiit'), 'username': btoa('ranch'),
+                                      'password': btoa('milk'),
+                                      'allergies': [btoa('Milk')], 'phone_number': btoa('+14566547878'),
                                       'user_addresses': {}
                          }
+
         const test = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
                                                  method: "POST",
                                                  headers: {
@@ -554,6 +632,7 @@ function SignUpPage() {
         let data = await test.json();
 
         console.log(data)
+        setErrors(data)
     }
 
     return (
@@ -593,7 +672,17 @@ function SignUpPage() {
                     isInvalid={!!errors.password}
                 ></Form.Control>
                 <Form.Control.Feedback type='invalid'>
-                    { errors.password }
+                    { "Password must..." }
+                    { errors.password ?
+                        (
+                          Object.keys(errors.password).map((oneKey, i)=>{
+                            return (
+                                <li key={i}>{errors.password[oneKey]}</li>
+                              )
+                          })
+                        ) : null
+                    }
+
                 </Form.Control.Feedback>
             </Form.Group>
             <Form.Group controlId='confirm_password'>
@@ -637,7 +726,6 @@ function SignUpPage() {
                     { errors.phone_number }
                 </Form.Control.Feedback>
             </Form.Group>
-
 
             { (Object.keys(form.user_addresses).length > 1) ? (
                 getAddresses().map(function(address, index) {
