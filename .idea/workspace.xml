@@ -6,12 +6,23 @@
   <component name="ChangeListManager">
     <list default="true" id="9acdbc88-a327-4850-bf03-d6c8347fe3a0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/serializers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/src/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/components/Header.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/components/Header.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/frontend/src/context/AuthContext.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/context/AuthContext.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/frontend/src/pages/LoginPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/pages/LoginPage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/frontend/src/pages/SignUpPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/pages/SignUpPage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/pages/UserHomePage.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/pages/UserHomePage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/utils/Logout.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/utils/Logout.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/utils/PrivateRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/utils/RestrictedRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/utils/useFetch.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/project4/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/project4/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,6 +165,17 @@
       <updated>1681084897175</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

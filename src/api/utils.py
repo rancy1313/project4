@@ -13,6 +13,7 @@ import base64
 
 # validate user form on the backend before creating an instance of the user data
 def user_data_backend_validation(user_info_form):
+
     # will hold all errors detected to pass on the front end and reset the errors
     errors = {}
 
@@ -117,7 +118,7 @@ def user_data_backend_validation(user_info_form):
 
     # allergies validation
 
-    allergies = {'Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans', 'Sesame'}
+    allergies = {'Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans', 'Sesame', 'None'}
 
     # if there are any unique elements from doing the difference, then there is unlisted allergies
     if len(set(user_info_form["allergies"]) - allergies) > 0:

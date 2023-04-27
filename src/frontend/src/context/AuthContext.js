@@ -8,41 +8,20 @@ export default AuthContext;
 
 
 export const AuthProvider = ({children}) => {
-    let [authTokens, setAuthTokens] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')) : null)
-    let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null)
-    let [loading, setLoading] = useState(true)
+    // check if there is a token in the storage to retrieve it else set null
+    let [tokens, setTokens] = useState(() => localStorage.getItem('tokens') ? JSON.parse(localStorage.getItem('tokens')) : null)
+    // check if we have a token in the storage to get the decoded user data from it
+    let [user, setUser] = useState(() => localStorage.getItem('tokens') ? jwt_decode(localStorage.getItem('tokens')) : null)
+    // used to decode the tokens to set user data
+    let [decodedToken, setDecodedToken] = useState(true)
 
-    //const history = useHistory()
     let navigate = useNavigate()
-    /*
-    let loginUser = async (e) => {
-        e.preventDefault()
 
-        let response = await fetch('http://127.0.0.1:8000/api/token/', {
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({'username':e.target.username.value, 'password':e.target.password.value})
-        })
-
-        let data = await response.json()
-        console.log(data, response.status)
-
-        if(response.status === 200){
-            setAuthTokens(data)
-            setUser(jwt_decode(data.access))
-            localStorage.setItem('authTokens', JSON.stringify(data))
-            //history.push('/')
-            navigate("/")
-        }else{
-            alert('Something went wrong!')
-        }
-    }*/
+    // login the user if there are no errors
     let loginUser = async (e, errors, setErrors) => {
         e.preventDefault()
-        console.log("errors:", errors)
 
+        // attempt to get token from backend with user data
         let response = await fetch('http://127.0.0.1:8000/api/token/', {
             method:'POST',
             headers:{
@@ -52,74 +31,45 @@ export const AuthProvider = ({children}) => {
         })
 
         let data = await response.json()
-        console.log(data, response.status)
 
+        // if the response is good(200)
         if(response.status === 200){
-            setAuthTokens(data)
+            // set the auth tokens from the backend
+            setTokens(data)
+            // decode the user data and store it in the local storage then navigate to home
             setUser(jwt_decode(data.access))
-            localStorage.setItem('authTokens', JSON.stringify(data))
+            localStorage.setItem('tokens', JSON.stringify(data))
             navigate("/")
         }else{
+            // else the username/password was incorrect, so set those errors
             setErrors(data)
-            // alert('Something went wrong!')
         }
     }
 
-    let updateToken = async ()=> {
-
-        console.log("authtokens", authTokens)
-        let response = await fetch('http://127.0.0.1:8000/api/token/refresh/', {
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({'refresh':authTokens?.refresh})
-        })
-        let data = await response.json()
-
-
-        if (response.status === 200){
-            setAuthTokens(data)
-            setUser(jwt_decode(data.access))
-            localStorage.setItem('authTokens', JSON.stringify(data))
-        }else{
-            navigate("/logout")
-        }
-
-        if(loading){
-            setLoading(false)
-        }
-    }
-
+    // these are the variables/functions that are passed through context
     let contextData = {
         user:user,
-        authTokens:authTokens,
-        loginUser:loginUser,
         setUser:setUser,
-        setAuthTokens:setAuthTokens,
+        tokens:tokens,
+        setTokens:setTokens,
+        loginUser:loginUser,
     }
 
-
+    // check if we have auth tokens. If so set the user info
     useEffect(()=> {
 
-        if(loading){
-            updateToken()
+        if (tokens) {
+            setUser(jwt_decode(tokens.access))
         }
 
-        let fourMinutes = 1000 * 60 * 4
+        // auth tokens are decoded so reset decodedToken
+        setDecodedToken(false)
 
-        let interval =  setInterval(()=> {
-            if(authTokens){
-                updateToken()
-            }
-        }, fourMinutes)
-        return ()=> clearInterval(interval)
-
-    }, [authTokens, loading])
+    }, [tokens, decodedToken])
 
     return(
         <AuthContext.Provider value={contextData} >
-            {loading ? null : children}
+            {decodedToken ? null : children}
         </AuthContext.Provider>
     )
 }

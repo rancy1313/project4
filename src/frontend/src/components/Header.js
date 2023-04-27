@@ -12,6 +12,7 @@ const Header = () => {
 
     return (
         <div>
+            {/* Navbar to display links based on if a user is logged in */}
             <Navbar bg="dark" variant="dark">
                 <Container>
                     <Nav className="me-auto">
@@ -29,9 +30,6 @@ const Header = () => {
                     </Nav>
                 </Container>
             </Navbar>
-
-
-            {user && <h1>Hello {user.username}</h1>}
 
         </div>
     )

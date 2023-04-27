@@ -1,11 +1,9 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from .models import UserInfo, Address
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import NoteSerializer
 from .utils import user_data_backend_validation, is_base64_encoded
 import base64
 
@@ -17,7 +15,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # customize token
         token['username'] = user.username
-        # ...
+        # every User should have a User Info entry
+        userInfo = UserInfo.objects.get(user=user)
+
+        token['preferred_name'] = userInfo.preferred_name
+        token['dob'] = userInfo.dob
+        token['phone_number'] = userInfo.phone_number
+        token['allergies'] = userInfo.allergies
 
         return token
 
@@ -26,6 +30,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
+# show routes in rest framework
 @api_view(['GET'])
 def getRoutes(request):
     routes = [
@@ -34,15 +39,6 @@ def getRoutes(request):
     ]
 
     return Response(routes)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def getNotes(request):
-    user = request.user
-    notes = user.note_set.all()
-    serializer = NoteSerializer(notes, many=True)
-    return Response(serializer.data)
 
 
 # username/phone number are unique fields, so we check them when
@@ -127,6 +123,7 @@ def submit_user_form(request):
     errors = user_data_backend_validation(user_info_form)
 
     # check errors in user_addresses_form before creating user account
+    # currently there is no validation for that. It is a work in progress.
 
     # we join the list of allergies because we are saving it as one string in the database
     user_info_form["allergies"] = "/".join(user_info_form["allergies"])

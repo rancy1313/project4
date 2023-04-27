@@ -29,6 +29,3 @@ class Address(models.Model):
     zipcode = models.CharField(max_length=5)
 
 
-class Note(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    body = models.TextField()

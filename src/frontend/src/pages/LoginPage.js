@@ -29,6 +29,7 @@ const LoginPage = () => {
     return (
         <div>
             <Form className="formSubmission" onSubmit={(e) => loginUser(e, errors, setErrors)}>
+                {/* show error warning if user failed to log in with the correct credentials */}
                 { errors.detail ?
                     <Alert variant="danger">
                         <Alert.Heading>Login Error</Alert.Heading>
@@ -37,6 +38,7 @@ const LoginPage = () => {
                         </p>
                     </Alert>
                 : null }
+                {/* a form that handles the user's username and password */}
                 <Form.Group controlId='username'>
                     <Form.Label>Username</Form.Label>
                     <Form.Control

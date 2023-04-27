@@ -48,8 +48,6 @@ function SignUpPage() {
 
     // this is used for our onChange function to update the form
     const setField = (field, value) => {
-        console.log('field: ', field);
-        console.log('value: ', value);
         /*
            1. if it is a delivery address change then those are updated differently
               b/c they are kept in a object.
@@ -126,7 +124,6 @@ function SignUpPage() {
     // this function is to trigger the useEffect function to make a call to the back end
     const callUseEffect = e => {
         e.preventDefault();
-        console.log(form);
         // trigger useEffect by updating userValidation
         setFormValidation(formValidation+1);
     }
@@ -155,7 +152,6 @@ function SignUpPage() {
                                                  'address': address, 'zipcode': zipcode });
 
         const setEditFormValues = (field, value) => {
-            console.log("hi", field)
             // Capitalize only the first letter
             var new_value = value.toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
 
@@ -628,47 +624,10 @@ function SignUpPage() {
 
             let data = await unique_field_request.json();
 
-            console.log("HandleSubmit:", data)
             // we navigate to the login page
             navigate("/login")
 
-            // check if there was any issues with the back end and navigate to /sign_up again to refresh page
         }
-    }
-
-    // a test function to validate data on the back end
-    async function testCalls(e) {
-        e.preventDefault();
-
-        console.log("data")
-        var test_form = {'dob': btoa("2000-04-13"), 'preferred_name': btoa('Jon'), 'username': btoa('mrjon'),
-                                      'password': btoa('Password123!'),
-                                      'allergies': [btoa('Milk')], 'phone_number': btoa('+14566547878'),
-                                      'user_addresses': {'delivery_address1': {
-                                                                                  "address": btoa("8938 W Mary St"),
-                                                                                  "address_name": btoa("Home"),
-                                                                                  "city": btoa("Chicago"),
-                                                                                  "zipcode": btoa("898328")
-                                                                                },
-                                                         'delivery_address2': {
-                                                                                  "address": btoa("7372 S Bale Ave"),
-                                                                                  "address_name": btoa("Work"),
-                                                                                  "city": btoa("Chicago"),
-                                                                                  "zipcode": btoa("432347")
-                                                                                },
-                                                         }
-                         }
-
-        const test = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
-                                                 method: "POST",
-                                                 headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify(test_form)})
-        let data = await test.json();
-
-        console.log(data)
-        setErrors(data)
     }
 
     return (
@@ -782,57 +741,61 @@ function SignUpPage() {
                 ) : (null) }
 
                 {/* Input fields are saving an address */}
-                <Form.Group controlId='delivery_address_name'>
-                    <Form.Label>Default Delivery Address (Optional)</Form.Label>
-                    <Form.Control
-                        placeholder='Save address as...'
-                        value={current_address.address_name}
-                        onChange={(e) => setField('address_name', e.target.value)}
-                        isInvalid={!!errors.address_name}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.address_name }
-                    </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group controlId='delivery_address_city'>
-                    <Form.Control
-                        placeholder='City'
-                        value={current_address.city}
-                        onChange={(e) => setField('city', e.target.value)}
-                        isInvalid={!!errors.city}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.city }
-                    </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group controlId='delivery_address'>
-                    <Form.Control
-                        placeholder='Address'
-                        value={current_address.address}
-                        onChange={(e) => setField('address', e.target.value)}
-                        isInvalid={!!errors.address}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.address }
-                    </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group controlId='delivery_address_zipcode'>
-                    <Form.Control
-                        placeholder='Zipcode'
-                        value={current_address.zipcode}
-                        onChange={(e) => setField('zipcode', e.target.value)}
-                        isInvalid={!!errors.zipcode}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.zipcode }
-                    </Form.Control.Feedback>
-                </Form.Group>
-                {/* Addresses need to be saved */}
-                <Form.Group>
-                    <button className={'btn btn-success'} onClick={saveNewAddress}>
-                        {(Object.keys(form.user_addresses).length === 1) ? 'Save Address' : 'Save Another Address'}
-                    </button>
-                </Form.Group>
+                { current_address ?
+                    <>
+                        <Form.Group controlId='delivery_address_name'>
+                            <Form.Label>Default Delivery Address (Optional)</Form.Label>
+                            <Form.Control
+                                placeholder='Save address as...'
+                                value={current_address.address_name}
+                                onChange={(e) => setField('address_name', e.target.value)}
+                                isInvalid={!!errors.address_name}
+                            ></Form.Control>
+                            <Form.Control.Feedback type='invalid'>
+                                { errors.address_name }
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group controlId='delivery_address_city'>
+                            <Form.Control
+                                placeholder='City'
+                                value={current_address.city}
+                                onChange={(e) => setField('city', e.target.value)}
+                                isInvalid={!!errors.city}
+                            ></Form.Control>
+                            <Form.Control.Feedback type='invalid'>
+                                { errors.city }
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group controlId='delivery_address'>
+                            <Form.Control
+                                placeholder='Address'
+                                value={current_address.address}
+                                onChange={(e) => setField('address', e.target.value)}
+                                isInvalid={!!errors.address}
+                            ></Form.Control>
+                            <Form.Control.Feedback type='invalid'>
+                                { errors.address }
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group controlId='delivery_address_zipcode'>
+                            <Form.Control
+                                placeholder='Zipcode'
+                                value={current_address.zipcode}
+                                onChange={(e) => setField('zipcode', e.target.value)}
+                                isInvalid={!!errors.zipcode}
+                            ></Form.Control>
+                            <Form.Control.Feedback type='invalid'>
+                                { errors.zipcode }
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        {/* Addresses need to be saved */}
+                        <Form.Group>
+                            <button className={'btn btn-success'} onClick={saveNewAddress}>
+                                {(Object.keys(form.user_addresses).length === 1) ? 'Save Address' : 'Save Another Address'}
+                            </button>
+                        </Form.Group>
+                    </>
+                : null }
 
                 {/* Multiselect component open source */}
                 <p>Allergies</p>
@@ -845,11 +808,7 @@ function SignUpPage() {
                         className='my-2'
                         variant='primary'>Sign Up</Button>
                 </Form.Group>
-                <Button
-                        type='submit'
-                        onClick={testCalls}
-                        className='my-2'
-                        variant='primary'>test  calls</Button>
+
             </Form>
         </>
     );
