@@ -25,7 +25,8 @@ class Address(models.Model):
     address_name = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
     address = models.CharField(max_length=20)
-    zipcode = models.CharField(max_length=10)
+    # zipcodes of length 5 digits only for now
+    zipcode = models.CharField(max_length=5)
 
 
 class Note(models.Model):

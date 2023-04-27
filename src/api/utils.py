@@ -22,6 +22,7 @@ def user_data_backend_validation(user_info_form):
         errors["username"] = "Username cannot be empty."
 
     user = User.objects.filter(username=user_info_form['username'])
+
     if user:
         errors["username"] = "Username is taken."
 
@@ -48,7 +49,7 @@ def user_data_backend_validation(user_info_form):
     # we make a list to append the password errors because there can be multiple password errors at once
     password_errors = []
 
-    if 8 < len(user_info_form["password"]) < 25:
+    if not (8 < len(user_info_form["password"]) < 25):
         # errors["password"] = "Password must be between 8 - 25 characters."
         password_errors.append("Password must be between 8 - 25 characters.")
 

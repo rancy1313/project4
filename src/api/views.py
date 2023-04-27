@@ -1,20 +1,12 @@
-from django.http import JsonResponse
-from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-
 from django.contrib.auth.models import User
-from .models import UserInfo
-
+from .models import UserInfo, Address
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-
 from .serializers import NoteSerializer
-from .models import Note
-
 from .utils import user_data_backend_validation, is_base64_encoded
-
 import base64
 
 
@@ -23,7 +15,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Add custom claims
+        # customize token
         token['username'] = user.username
         # ...
 
@@ -81,6 +73,7 @@ def validate_unique_fields(request):
 # this function handles the user form from registration when the front end has checked it for errors
 @api_view(['POST'])
 def submit_user_form(request):
+
     # create a user info dictionary to hold the decoded data from the user
     user_info_form = {}
 
@@ -113,13 +106,13 @@ def submit_user_form(request):
 
     # user addresses are saved in a different dictionary from user info because
     # user addresses are created from a different model
-    user_addresses_form = {"user_addresses": {}}
+    user_addresses_form = {}
 
     # loop through data in the user_addresses to decode it and save it to the user_addresses dict
     for address in request.data["user_addresses"]:
 
         # set each address in user_addresses to an empty dict to collect the data for the address fields
-        user_addresses_form["user_addresses"][address] = {}
+        user_addresses_form[address] = {}
 
         for field in request.data["user_addresses"][address]:
 
@@ -128,12 +121,12 @@ def submit_user_form(request):
                 return Response({"error": "Submitted data was rejected."})
 
             decoded_data = base64.b64decode(request.data["user_addresses"][address][field]).decode("utf-8")
-            user_addresses_form["user_addresses"][address][field] = decoded_data
+            user_addresses_form[address][field] = decoded_data
 
     # pass user_info_form to user_data_backend_validation to see if there are any errors in the data
     errors = user_data_backend_validation(user_info_form)
 
-    # check errors in user_addresses_form
+    # check errors in user_addresses_form before creating user account
 
     # we join the list of allergies because we are saving it as one string in the database
     user_info_form["allergies"] = "/".join(user_info_form["allergies"])
@@ -143,5 +136,25 @@ def submit_user_form(request):
         return Response(errors)
     else:
         # else create user and direct user to login page on front end
-        user = User.objects.create(username=user_info_form['username'], password=user_info_form['password'])
+        user = User.objects.create(username=user_info_form['username'])
+        # hash the password
+        user.set_password(user_info_form['password'])
+        user.save()
+
+        # remove the fields that are not in UserInfo model to avoid TypeError
+        del user_info_form["username"]
+        del user_info_form["password"]
+
+        # add user to user_form_info from the user object that was created for foreign key
+        user_info_form["user"] = user
+
+        # create user info entry from user's data by unpacking it
+        UserInfo.objects.create(**user_info_form)
+
+        # for every address add the user for the foreign key and then create that address
+        for address in user_addresses_form:
+            user_addresses_form[address]["user"] = user
+            Address.objects.create(**user_addresses_form[address])
+
+        # send success message to direct the user to the login page
         return Response({"success": "No errors detected."})

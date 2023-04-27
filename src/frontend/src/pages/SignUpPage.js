@@ -1,28 +1,27 @@
 import { useState, useEffect, useContext } from 'react';
 
-// phone number input code
-import 'react-phone-number-input/style.css';
+// botstrap/ style imports
+import Button from 'react-bootstrap/Button';
+import Input from 'react-phone-number-input/input'
 import PhoneInput from 'react-phone-number-input';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import { Multiselect } from "multiselect-react-dropdown";
-import Button from 'react-bootstrap/Button';
+import 'react-phone-number-input/style.css';
 
-import Input from 'react-phone-number-input/input'
-
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 
 function SignUpPage() {
 
     // set the available allergies to pass in the bootstrap selector
-    const allergies = ['Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans', 'Sesame']
+    const allergies = ['Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans', 'Sesame'];
 
     // used to trigger handleSubmit
     const [formValidation, setFormValidation] = useState(0);
 
     // navigate to login page if form was submitted successfully
-    let navigate = useNavigate()
+    let navigate = useNavigate();
 
     // set the date of birth value here to preset the date of birth option to current date
     var dateObj = new Date();
@@ -59,26 +58,33 @@ function SignUpPage() {
         */
         if (field in form['user_addresses'][Object.keys(form.user_addresses)[Object.keys(form.user_addresses).length - 1]]) {
             // assign delivery_address to tmp var
-            const tmp = form.user_addresses
+            const tmp = form.user_addresses;
+
+            // Capitalize only the first letter
+            value = value.toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+
             // tmp and form.delivery_address point to same dict,
             // but changes are not saved so we use the setForm func to save the changes
-            tmp[Object.keys(form.user_addresses)[Object.keys(form.user_addresses).length - 1]][field] = value
-            setForm({
-                ...form,
-                'user_addresses':tmp
-            })
+            tmp[Object.keys(form.user_addresses)[Object.keys(form.user_addresses).length - 1]][field] = value;
+
+            // zipcodes of 5 digits currently only accepted for now
+            if (field === "zipcode" && /^\d+$/.test(value) && value.length <= 5 || field !== "zipcode")
+                setForm({
+                    ...form,
+                    'user_addresses':tmp
+                });
         } else {
             // just change the field in the form
             setForm({
                 ...form,
                 [field]:value
-            })
+            });
             // reset errors if there are no new errors
             if(!!errors[field])
             setErrors({
                 ...errors,
                 [field]:null
-            })
+            });
         }
     }
 
@@ -90,20 +96,20 @@ function SignUpPage() {
         // the phone number component will return undefined if it becomes empty
         if (value == undefined)
             // so we make sure it get changed to empty string if that happens
-            value = ""
+            value = "";
 
         // update the form
         setForm({
             ...form,
             'phone_number':value
-        })
+        });
 
         // delete the errors
         if(!!errors['phone_number'])
         setErrors({
             ...errors,
             'phone_number':null
-        })
+        });
 
         // check if value is not null first to make sure .length doesn't crash
         if (value && value.length > 12) {
@@ -120,7 +126,7 @@ function SignUpPage() {
     // this function is to trigger the useEffect function to make a call to the back end
     const callUseEffect = e => {
         e.preventDefault();
-        console.log(form)
+        console.log(form);
         // trigger useEffect by updating userValidation
         setFormValidation(formValidation+1);
     }
@@ -148,8 +154,22 @@ function SignUpPage() {
         const [editForm, setEditForm] = useState({ 'id': id, 'address_name': address_name, 'city': city,
                                                  'address': address, 'zipcode': zipcode });
 
+        const setEditFormValues = (field, value) => {
+            console.log("hi", field)
+            // Capitalize only the first letter
+            var new_value = value.toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+
+            // zipcodes of 5 digits currently only accepted for now
+            if (field === "zipcode" && /^\d+$/.test(value) && value.length <= 5 || field !== "zipcode")
+                setEditForm({
+                    ...editForm,
+                    [field]: new_value
+                });
+        }
+
         return (
         <>
+            {/* Card displaying the saved address info */}
             <Card.Body>
                 <button className={'btn btn-danger'} onClick={(e) => deleteAddress(e, id)}>Delete</button>{' '}
                 <button id={'editButton_'+id} className={'btn btn-warning'} onClick={(e) => { editAddress(e, id, editForm) } }>Edit</button>
@@ -161,6 +181,7 @@ function SignUpPage() {
                 </div>
             </Card.Body>
 
+            {/* A page to edit the saved address that is toggled */}
             <div className={'editPage hidden'} id={'editPage_'+id}>
                 <Card.Title>Delivery Address { index + 1 }</Card.Title>
                 <Form.Group controlId={'edit_'+id}>
@@ -168,7 +189,7 @@ function SignUpPage() {
                     <Form.Control
                         placeholder='Save address as...'
                         value={editForm.address_name}
-                        onChange={(e) => setEditForm({...editForm, 'address_name': e.target.value})}
+                        onChange={(e) => setEditFormValues("address_name", e.target.value)}
                         isInvalid={!!errors['address_name_' + id]}
                     ></Form.Control>
                     <Form.Control.Feedback type='invalid'>
@@ -179,7 +200,7 @@ function SignUpPage() {
                     <Form.Control
                         placeholder='City'
                         value={editForm.city}
-                        onChange={(e) => setEditForm({...editForm, 'city': e.target.value})}
+                        onChange={(e) => setEditFormValues("city", e.target.value)}
                         isInvalid={!!errors['city_' + id]}
                     ></Form.Control>
                     <Form.Control.Feedback type='invalid'>
@@ -190,7 +211,7 @@ function SignUpPage() {
                     <Form.Control
                         placeholder='Address'
                         value={editForm.address}
-                        onChange={(e) => setEditForm({...editForm, 'address': e.target.value})}
+                        onChange={(e) => setEditFormValues("address", e.target.value)}
                         isInvalid={!!errors['address_' + id]}
                     ></Form.Control>
                     <Form.Control.Feedback type='invalid'>
@@ -201,7 +222,7 @@ function SignUpPage() {
                     <Form.Control
                         placeholder='Zipcode'
                         value={editForm.zipcode}
-                        onChange={(e) => setEditForm({...editForm, 'zipcode': e.target.value})}
+                        onChange={(e) => setEditFormValues("zipcode", e.target.value)}
                         isInvalid={!!errors['zipcode_' + id]}
                     ></Form.Control>
                     <Form.Control.Feedback type='invalid'>
@@ -289,7 +310,7 @@ function SignUpPage() {
 
             // we do not want the latest address because that is the one that is being saved
             if (key !== Object.keys(form.user_addresses)[Object.keys(form.user_addresses).length - 1]) {
-                addresses.push(key)
+                addresses.push(key);
             }
         }
 
@@ -302,7 +323,7 @@ function SignUpPage() {
         e.preventDefault();
 
         // hold any any errors to update the errors object
-        const newErrors = {}
+        const newErrors = {};
 
         // loop through the fields in the current address and check if any of them are empty
         for (const field in current_address) {
@@ -328,10 +349,10 @@ function SignUpPage() {
             setErrors(newErrors);
         } else {
             // update saved addresses list to include the new address
-            setSaved_addresses(saved_addresses => [...saved_addresses, Object.keys(form.user_addresses)[Object.keys(form.user_addresses).length - 1]])
+            setSaved_addresses(saved_addresses => [...saved_addresses, Object.keys(form.user_addresses)[Object.keys(form.user_addresses).length - 1]]);
             // if there are no errors then we add a new address
             // we cannot directly change the form so we assign it to a tmp var to then reassign in setForm function
-            const tmp = form.user_addresses
+            const tmp = form.user_addresses;
 
             //    We need to create a new delivery_address key in the form's user_addresses object. To do so, I set it
             //    up to retrieve the last key in the object, strip 'delivery_address' from the key name to get left with
@@ -345,7 +366,8 @@ function SignUpPage() {
             setForm({
                     ...form,
                     'user_addresses':tmp
-            })
+            });
+
             // loop through the keys in the current address to delete the old errors
             for (const key in current_address) {
                 delete errors[key];
@@ -435,7 +457,7 @@ function SignUpPage() {
         }
 
         // password must be at least 8 chars and at most 25 chars
-        if (8 < password.length < 25) {
+        if (!(8 < password.length < 25)) {
             // this is the first error checked, we can just initialize it
             newErrors.password = ['Be between 8 and 25 characters.']
         }
@@ -606,9 +628,9 @@ function SignUpPage() {
 
             let data = await unique_field_request.json();
 
-            console.log(data)
+            console.log("HandleSubmit:", data)
             // we navigate to the login page
-            //navigate("/login")
+            navigate("/login")
 
             // check if there was any issues with the back end and navigate to /sign_up again to refresh page
         }
@@ -617,10 +639,24 @@ function SignUpPage() {
     // a test function to validate data on the back end
     async function testCalls(e) {
         e.preventDefault();
-        var test_form = {'dob': btoa("2000-04-13"), 'preferred_name': btoa('teshiit'), 'username': btoa('ranch'),
-                                      'password': btoa('milk'),
+
+        console.log("data")
+        var test_form = {'dob': btoa("2000-04-13"), 'preferred_name': btoa('Jon'), 'username': btoa('mrjon'),
+                                      'password': btoa('Password123!'),
                                       'allergies': [btoa('Milk')], 'phone_number': btoa('+14566547878'),
-                                      'user_addresses': {}
+                                      'user_addresses': {'delivery_address1': {
+                                                                                  "address": btoa("8938 W Mary St"),
+                                                                                  "address_name": btoa("Home"),
+                                                                                  "city": btoa("Chicago"),
+                                                                                  "zipcode": btoa("898328")
+                                                                                },
+                                                         'delivery_address2': {
+                                                                                  "address": btoa("7372 S Bale Ave"),
+                                                                                  "address_name": btoa("Work"),
+                                                                                  "city": btoa("Chicago"),
+                                                                                  "zipcode": btoa("432347")
+                                                                                },
+                                                         }
                          }
 
         const test = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
@@ -636,187 +672,186 @@ function SignUpPage() {
     }
 
     return (
-    <>
-        <h1>Hello world</h1>
-        <Form className="formSubmission">
-            <Form.Group controlId='name'>
-                <Form.Label>Preferred Name</Form.Label>
-                <Form.Control
-                    type='text'
-                    value={form.preferred_name}
-                    onChange={(e) => setField('preferred_name', e.target.value)}
-                    isInvalid={!!errors.preferred_name}
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                    { errors.preferred_name }
-                </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group controlId='username'>
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                    type='text'
-                    value={form.username}
-                    onChange={(e) => setField('username', e.target.value)}
-                    isInvalid={!!errors.username}
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                    { errors.username }
-                </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group controlId='password'>
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                    type='password'
-                    value={form.password}
-                    onChange={(e) => setField('password', e.target.value)}
-                    isInvalid={!!errors.password}
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                    { "Password must..." }
-                    { errors.password ?
-                        (
-                          Object.keys(errors.password).map((oneKey, i)=>{
-                            return (
-                                <li key={i}>{errors.password[oneKey]}</li>
-                              )
-                          })
-                        ) : null
-                    }
+        <>
+            <Form className="formSubmission">
 
-                </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group controlId='confirm_password'>
-                <Form.Label>Confirm Password</Form.Label>
-                <Form.Control
-                    type='password'
-                    value={form.confirm_password}
-                    onChange={(e) => setField('confirm_password', e.target.value)}
-                    isInvalid={!!errors.confirm_password}
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                    { errors.confirm_password }
-                </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group controlId='dob'>
-                <Form.Label>Date of Birth</Form.Label>
-                <Form.Control
-                    type='date'
-                    value={form.dob}
-                    onChange={(e) => setField('dob', e.target.value)}
-                    isInvalid={!!errors.dob}
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                    { errors.dob }
-                </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group controlId='phone_number'>
-                <Form.Label>Phone Number</Form.Label>
-                <br />
-                <Input
-                    country="US"
-                    international
-                    withCountryCallingCode
-                    value={form.phone_number}
-                    onChange={setPhoneNumber}/>
-                <Form.Control
-                  isInvalid={!!errors.phone_number}
-                  hidden
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                    { errors.phone_number }
-                </Form.Control.Feedback>
-            </Form.Group>
+                {/* The next blocks handle updating the user's form data and errors */}
+                <Form.Group controlId='name'>
+                    <Form.Label>Preferred Name</Form.Label>
+                    <Form.Control
+                        type='text'
+                        value={form.preferred_name}
+                        onChange={(e) => setField('preferred_name', e.target.value)}
+                        isInvalid={!!errors.preferred_name}
+                    ></Form.Control>
+                    {/* If data is invalid, show errors */}
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.preferred_name }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='username'>
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control
+                        type='text'
+                        value={form.username}
+                        onChange={(e) => setField('username', e.target.value)}
+                        isInvalid={!!errors.username}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.username }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='password'>
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                        type='password'
+                        value={form.password}
+                        onChange={(e) => setField('password', e.target.value)}
+                        isInvalid={!!errors.password}
+                    ></Form.Control>
+                    {/* The password field can have multiple errors */}
+                    <Form.Control.Feedback type='invalid'>
+                        { "Password must..." }
+                        { errors.password ?
+                            (
+                              Object.keys(errors.password).map((oneKey, i)=>{
+                                return (
+                                    <li key={i}>{errors.password[oneKey]}</li>
+                                  )
+                              })
+                            ) : null
+                        }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='confirm_password'>
+                    <Form.Label>Confirm Password</Form.Label>
+                    <Form.Control
+                        type='password'
+                        value={form.confirm_password}
+                        onChange={(e) => setField('confirm_password', e.target.value)}
+                        isInvalid={!!errors.confirm_password}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.confirm_password }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='dob'>
+                    <Form.Label>Date of Birth</Form.Label>
+                    <Form.Control
+                        type='date'
+                        value={form.dob}
+                        onChange={(e) => setField('dob', e.target.value)}
+                        isInvalid={!!errors.dob}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.dob }
+                    </Form.Control.Feedback>
+                </Form.Group>
 
-            { (Object.keys(form.user_addresses).length > 1) ? (
-                getAddresses().map(function(address, index) {
-                    return <div key={index}><AddressCards
-                                index={index}
-                                id={address}
-                                address_name={form.user_addresses[address].address_name}
-                                city={form.user_addresses[address].city}
-                                address={form.user_addresses[address].address}
-                                zipcode={form.user_addresses[address].zipcode}
-                          /></div>;
-                })
-            ) : (null)
+                {/* I am using PhoneNumber component Open Source */}
+                <Form.Group controlId='phone_number'>
+                    <Form.Label>Phone Number</Form.Label>
+                    <br />
+                    <Input
+                        country="US"
+                        international
+                        withCountryCallingCode
+                        value={form.phone_number}
+                        onChange={setPhoneNumber}/>
+                    <Form.Control
+                      isInvalid={!!errors.phone_number}
+                      hidden
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.phone_number }
+                    </Form.Control.Feedback>
+                </Form.Group>
 
-            }
-            {current_address ?
-                <>
-                    <Form.Group controlId='delivery_address_name'>
-                        <Form.Label>Default Delivery Address (Optional)</Form.Label>
-                        <Form.Control
-                            placeholder='Save address as...'
-                            value={current_address.address_name}
-                            onChange={(e) => setField('address_name', e.target.value)}
-                            isInvalid={!!errors.address_name}
-                        ></Form.Control>
-                        <Form.Control.Feedback type='invalid'>
-                            { errors.address_name }
-                        </Form.Control.Feedback>
-                    </Form.Group>
+                {/* If there are saved addresses, then loop through them to display them */}
+                { (Object.keys(form.user_addresses).length > 1) ? (
+                    getAddresses().map(function(address, index) {
+                        return <div key={index}><AddressCards
+                                    index={index}
+                                    id={address}
+                                    address_name={form.user_addresses[address].address_name}
+                                    city={form.user_addresses[address].city}
+                                    address={form.user_addresses[address].address}
+                                    zipcode={form.user_addresses[address].zipcode}
+                              /></div>;
+                    })
+                ) : (null) }
 
-                    <Form.Group controlId='delivery_address_city'>
-                        <Form.Control
-                            placeholder='City'
-                            value={current_address.city}
-                            onChange={(e) => setField('city', e.target.value)}
-                            isInvalid={!!errors.city}
-                        ></Form.Control>
-                        <Form.Control.Feedback type='invalid'>
-                            { errors.city }
-                        </Form.Control.Feedback>
-                    </Form.Group>
+                {/* Input fields are saving an address */}
+                <Form.Group controlId='delivery_address_name'>
+                    <Form.Label>Default Delivery Address (Optional)</Form.Label>
+                    <Form.Control
+                        placeholder='Save address as...'
+                        value={current_address.address_name}
+                        onChange={(e) => setField('address_name', e.target.value)}
+                        isInvalid={!!errors.address_name}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.address_name }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='delivery_address_city'>
+                    <Form.Control
+                        placeholder='City'
+                        value={current_address.city}
+                        onChange={(e) => setField('city', e.target.value)}
+                        isInvalid={!!errors.city}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.city }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='delivery_address'>
+                    <Form.Control
+                        placeholder='Address'
+                        value={current_address.address}
+                        onChange={(e) => setField('address', e.target.value)}
+                        isInvalid={!!errors.address}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.address }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId='delivery_address_zipcode'>
+                    <Form.Control
+                        placeholder='Zipcode'
+                        value={current_address.zipcode}
+                        onChange={(e) => setField('zipcode', e.target.value)}
+                        isInvalid={!!errors.zipcode}
+                    ></Form.Control>
+                    <Form.Control.Feedback type='invalid'>
+                        { errors.zipcode }
+                    </Form.Control.Feedback>
+                </Form.Group>
+                {/* Addresses need to be saved */}
+                <Form.Group>
+                    <button className={'btn btn-success'} onClick={saveNewAddress}>
+                        {(Object.keys(form.user_addresses).length === 1) ? 'Save Address' : 'Save Another Address'}
+                    </button>
+                </Form.Group>
 
-                    <Form.Group controlId='delivery_address'>
-                        <Form.Control
-                            placeholder='Address'
-                            value={current_address.address}
-                            onChange={(e) => setField('address', e.target.value)}
-                            isInvalid={!!errors.address}
-                        ></Form.Control>
-                        <Form.Control.Feedback type='invalid'>
-                            { errors.address }
-                        </Form.Control.Feedback>
-                    </Form.Group>
+                {/* Multiselect component open source */}
+                <p>Allergies</p>
+                <Multiselect onSelect={setAllergies} showArrow options={allergies} isObject={false} />
 
-                    <Form.Group controlId='delivery_address_zipcode'>
-                        <Form.Control
-                            placeholder='Zipcode'
-                            value={current_address.zipcode}
-                            onChange={(e) => setField('zipcode', e.target.value)}
-                            isInvalid={!!errors.zipcode}
-                        ></Form.Control>
-                        <Form.Control.Feedback type='invalid'>
-                            { errors.zipcode }
-                        </Form.Control.Feedback>
-                    </Form.Group>
-
-                    <Form.Group>
-                        <button className={'btn btn-success'} onClick={saveNewAddress}>
-                            {(Object.keys(form.user_addresses).length === 1) ? 'Save Address' : 'Save Another Address'}
-                        </button>
-                    </Form.Group>
-                </>
-            : null }
-
-            <p>Allergies</p>
-            <Multiselect onSelect={setAllergies} showArrow options={allergies} isObject={false} />
-
-            <Form.Group>
+                <Form.Group>
+                    <Button
+                        type='submit'
+                        onClick={callUseEffect}
+                        className='my-2'
+                        variant='primary'>Sign Up</Button>
+                </Form.Group>
                 <Button
-                    type='submit'
-                    onClick={callUseEffect}
-                    className='my-2'
-                    variant='primary'>Sign Up</Button>
-            </Form.Group>
-            <Button
-                    type='submit'
-                    onClick={testCalls}
-                    className='my-2'
-                    variant='primary'>test</Button>
-        </Form>
-    </>
+                        type='submit'
+                        onClick={testCalls}
+                        className='my-2'
+                        variant='primary'>test  calls</Button>
+            </Form>
+        </>
     );
 }
 

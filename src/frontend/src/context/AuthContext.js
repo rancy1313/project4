@@ -14,9 +14,10 @@ export const AuthProvider = ({children}) => {
 
     //const history = useHistory()
     let navigate = useNavigate()
-
-    let loginUser = async (e )=> {
+    /*
+    let loginUser = async (e) => {
         e.preventDefault()
+
         let response = await fetch('http://127.0.0.1:8000/api/token/', {
             method:'POST',
             headers:{
@@ -26,6 +27,7 @@ export const AuthProvider = ({children}) => {
         })
 
         let data = await response.json()
+        console.log(data, response.status)
 
         if(response.status === 200){
             setAuthTokens(data)
@@ -35,6 +37,31 @@ export const AuthProvider = ({children}) => {
             navigate("/")
         }else{
             alert('Something went wrong!')
+        }
+    }*/
+    let loginUser = async (e, errors, setErrors) => {
+        e.preventDefault()
+        console.log("errors:", errors)
+
+        let response = await fetch('http://127.0.0.1:8000/api/token/', {
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({'username': e.target.username.value, 'password': e.target.password.value})
+        })
+
+        let data = await response.json()
+        console.log(data, response.status)
+
+        if(response.status === 200){
+            setAuthTokens(data)
+            setUser(jwt_decode(data.access))
+            localStorage.setItem('authTokens', JSON.stringify(data))
+            navigate("/")
+        }else{
+            setErrors(data)
+            // alert('Something went wrong!')
         }
     }
 
