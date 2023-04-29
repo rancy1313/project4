@@ -46,15 +46,6 @@ export const AuthProvider = ({children}) => {
         }
     }
 
-    // these are the variables/functions that are passed through context
-    let contextData = {
-        user:user,
-        setUser:setUser,
-        tokens:tokens,
-        setTokens:setTokens,
-        loginUser:loginUser,
-    }
-
     // check if we have auth tokens. If so set the user info
     useEffect(()=> {
 
@@ -66,6 +57,15 @@ export const AuthProvider = ({children}) => {
         setDecodedToken(false)
 
     }, [tokens, decodedToken])
+
+    // these are the variables/functions that are passed through context
+    let contextData = {
+        user: user,
+        setUser: setUser,
+        tokens: tokens,
+        setTokens: setTokens,
+        loginUser: loginUser,
+    }
 
     return(
         <AuthContext.Provider value={contextData} >

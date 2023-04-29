@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 
-// botstrap/ style imports
+// botstrap / style imports
 import Button from 'react-bootstrap/Button';
 import Input from 'react-phone-number-input/input'
 import PhoneInput from 'react-phone-number-input';
@@ -111,7 +111,7 @@ function SignUpPage() {
 
         // check if value is not null first to make sure .length doesn't crash
         if (value && value.length > 12) {
-            const newErrors = {'phone_number': 'Phone number too long.'};
+            const newErrors = {'phone_number': 'Phone number is too long.'};
             setErrors(newErrors);
         }
     }
@@ -453,7 +453,7 @@ function SignUpPage() {
         }
 
         // password must be at least 8 chars and at most 25 chars
-        if (!(8 < password.length < 25)) {
+        if (8 > password.length || password.length > 25) {
             // this is the first error checked, we can just initialize it
             newErrors.password = ['Be between 8 and 25 characters.']
         }
@@ -475,29 +475,29 @@ function SignUpPage() {
         }
 
         // calculate difference to see if no special chars were used
-        const acceptable_chars = "'$%^&*-_+=~`|/,.;:\"'{}[]()!@".split("")
+        const acceptable_chars = "$%^&*_+=~`|/,;:!@".split("")
         const password_set = password.split("")
         var diff = acceptable_chars.filter(char => !password.includes(char));
 
         // acceptable $%^&*-_+=~`|/,.;:"'{}[]()!@
         // if the diff is 29 then no special chars were used
-        if (diff.length === 29) {
+        if (diff.length === acceptable_chars.length) {
             // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
             if (newErrors.password)
-                newErrors.password.push('Contain one of the following chars ($%^&*-_+=~`|/,.;:\"\'{}[]()!@.).');
+                newErrors.password.push('Contain one of the following chars (\'$%^&*_+=~`|/,;:\"!@).');
             else {
-                newErrors.password = ['Contain one of the following chars ($%^&*-_+=~`|/,.;:\"\'{}[]()!@.).']
+                newErrors.password = ['Contain one of the following chars (\'$%^&*_+=~`|/,;:\"!@).']
             }
         }
 
         // I am restricting these chars for now more for testing purposes
         // until I research a bit more on data sanitization
-        const restricted_chars = "<>?#\\-.@".split("")
+        const restricted_chars = "'\"<>?#\\-.{}[]()".split("")
         diff = restricted_chars.filter(char => !password.includes(char));
 
         // Still researching which chars to restrict. For now, these are some placeholders.
         // restricted <>?#-.@\
-        if (diff.length !== 8) {
+        if (diff.length !== restricted_chars.length) {
             // passwords can have multiple errors, so depending on if it is the first or not we push or initialize
             if (newErrors.password)
                 newErrors.password.push('Restricted char detected.');
@@ -574,7 +574,7 @@ function SignUpPage() {
         return newErrors;
     }
 
-    async function handleSubmit(formErrors) {
+    function handleSubmit(formErrors) {
 
         // if formErrors errors keys are greater than 0 then there are errors and can't submit form
         if (Object.keys(formErrors).length > 0) {
@@ -602,7 +602,9 @@ function SignUpPage() {
                 copy_form.user_addresses[key1] = {}
                 // loop through every field and add the data to the copy form address
                 Object.keys(form.user_addresses[key1]).forEach(function(key2, index2) {
-                    copy_form.user_addresses[key1][key2] = btoa(form.user_addresses[key1][key2]);
+                    // edited address have an id field. Do not copy it
+                    if (key2 !== "id")
+                        copy_form.user_addresses[key1][key2] = btoa(form.user_addresses[key1][key2]);
                 });
             });
 
@@ -615,14 +617,13 @@ function SignUpPage() {
             }
 
             // we send encrypted copy form to the back end
-            const unique_field_request = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
+            const unique_field_request = fetch("http://127.0.0.1:8000/api/submit-user-form/", {
                                                  method: "POST",
                                                  headers: {
                                                     'Content-Type': 'application/json'
                                                 },
                                                 body: JSON.stringify(copy_form)})
 
-            let data = await unique_field_request.json();
 
             // we navigate to the login page
             navigate("/login")
@@ -633,7 +634,6 @@ function SignUpPage() {
     return (
         <>
             <Form className="formSubmission">
-
                 {/* The next blocks handle updating the user's form data and errors */}
                 <Form.Group controlId='name'>
                     <Form.Label>Preferred Name</Form.Label>
@@ -643,10 +643,12 @@ function SignUpPage() {
                         onChange={(e) => setField('preferred_name', e.target.value)}
                         isInvalid={!!errors.preferred_name}
                     ></Form.Control>
+
                     {/* If data is invalid, show errors */}
                     <Form.Control.Feedback type='invalid'>
                         { errors.preferred_name }
                     </Form.Control.Feedback>
+
                 </Form.Group>
                 <Form.Group controlId='username'>
                     <Form.Label>Username</Form.Label>
@@ -681,6 +683,10 @@ function SignUpPage() {
                             ) : null
                         }
                     </Form.Control.Feedback>
+                    <Form.Text className='text-muted'>
+                        Password must be between 8 and 25 characters and contain at least one uppercase letter, one
+                        lowercase letter, one special char($%^&*_+=~`|/,;:\!@), and one number.
+                    </Form.Text>
                 </Form.Group>
                 <Form.Group controlId='confirm_password'>
                     <Form.Label>Confirm Password</Form.Label>

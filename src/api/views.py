@@ -123,7 +123,7 @@ def submit_user_form(request):
     errors = user_data_backend_validation(user_info_form)
 
     # check errors in user_addresses_form before creating user account
-    # currently there is no validation for that. It is a work in progress.
+    # currently there is no validation for user_addresses_form. It is a work in progress.
 
     # we join the list of allergies because we are saving it as one string in the database
     user_info_form["allergies"] = "/".join(user_info_form["allergies"])

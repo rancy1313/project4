@@ -50,37 +50,35 @@ def user_data_backend_validation(user_info_form):
     # we make a list to append the password errors because there can be multiple password errors at once
     password_errors = []
 
-    if not (8 < len(user_info_form["password"]) < 25):
-        # errors["password"] = "Password must be between 8 - 25 characters."
+    if (8 > len(user_info_form["password"]) or len(user_info_form["password"]) > 25):
         password_errors.append("Password must be between 8 - 25 characters.")
 
     has_capital = re.search(r"[A-Z]", user_info_form["password"])
     if not has_capital:
-        # errors["password"] = "Password must contain at least one capital letter."
         password_errors.append("Password must contain at least one capital letter.")
 
     has_lower_case = re.search(r"[a-z]", user_info_form["password"])
     if not has_lower_case:
-        # errors["password"] = "Password must contain at least one lower case letter."
         password_errors.append("Password must contain at least one lower case letter.")
 
     has_digit = any(char.isdigit() for char in user_info_form["password"])
     if not has_digit:
-        # errors["password"] = "Password must contain at least one digit."
         password_errors.append("Password must contain at least one digit.")
 
-    # restricted_chars = set("'$%^&*-_+=~`|/,.;:\"'{}[]()!@")
-    restricted_chars = set("'$%^&*-_+=~`|/,.;:\"'{}[]()!@")
+    accepted_chars = set("$%^&*_+=~`|/,;:!@")
 
-    if len(restricted_chars - set(user_info_form["password"])) == len(restricted_chars):
-        # errors["password"] = "Password must contain at least one special character."
+    if len(accepted_chars - set(user_info_form["password"])) == len(accepted_chars):
         password_errors.append("Password must contain at least one special character.")
+
+    restricted_chars = set("'\"<>?#\\-.{}[]()")
+
+    if len(restricted_chars - set(user_info_form["password"])) != len(restricted_chars):
+        password_errors.append("Restricted char detected.")
 
     # search from re library returns true if more than two chars are consecutively together => "ooo"
     repeating_chars = re.search(r"(.)\1{2,}", user_info_form["password"])
 
     if repeating_chars:
-        # errors["password"] = "Password must not contain more than 3 consecutively repeating characters."
         password_errors.append("Password must not contain more than 3 consecutively repeating characters.")
 
     # if there are any password errors then create key, value pair for it in the errors

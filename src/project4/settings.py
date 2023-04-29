@@ -62,7 +62,7 @@ ROOT_URLCONF = "project4.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "frontend/build"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -171,3 +171,7 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+STATICFILES_DIRS = [
+   BASE_DIR / "frontend/build/static"
+]

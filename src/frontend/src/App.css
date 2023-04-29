@@ -1,3 +1,4 @@
+/* form sign up / login css */
 .formSubmission > * {
     margin: 20px 50px;
 }
@@ -7,10 +8,12 @@
     margin: auto;
 }
 
+/* edit page */
 .editPage {
     margin: 20px;
 }
 
+/* delete button in the edit page */
 .red {
     display: block;
     width: 100%;
@@ -23,16 +26,19 @@
     border: 1px solid #d9534f;
 }
 
+/* toggle messages */
 .hidden {
     display: none;
 }
 
+/* the logout link in the nav */
 #btn-logout {
     background-color: transparent;
     color: #A9A9A9;
     border: none;
 }
 
+/* these center the addresses / form elements  */
 .center > * {
     text-align: center;
     margin: 20px auto;
@@ -44,6 +50,6 @@
 }
 
 .centers {
-text-align: center;
-margin: 20px auto;
+    text-align: center;
+    margin: 20px auto;
 }
