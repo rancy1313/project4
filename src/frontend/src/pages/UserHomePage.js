@@ -13,6 +13,7 @@ const HomePage = () => {
     // get user data and display it on an alert
     return (
         <div>
+
             <Alert variant="success">
                 <Alert.Heading>Welcome, { user.preferred_name }!</Alert.Heading>
                 <p>You are logged to the home page!</p>

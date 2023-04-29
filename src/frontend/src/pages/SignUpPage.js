@@ -6,6 +6,8 @@ import Input from 'react-phone-number-input/input'
 import PhoneInput from 'react-phone-number-input';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
+import FloatingLabel from 'react-bootstrap/FloatingLabel';
+
 import { Multiselect } from "multiselect-react-dropdown";
 import 'react-phone-number-input/style.css';
 
@@ -34,7 +36,7 @@ function SignUpPage() {
 
 
     // we have a base form set that will hold all the information from the user to send to the backend when completed
-    const [form, setForm] = useState({'dob': newDate, 'preferred_name': '', 'username': '', 'password': '',
+    const [form, setForm] = useState({'test': '', 'dob': newDate, 'preferred_name': '', 'username': '', 'password': '',
                                       'confirm_password': '', 'allergies': ['None'], 'phone_number': '',
                                       'user_addresses': {'delivery_address1': {'address_name': '', 'city': '',
                                       'address': '', 'zipcode': ''}}});
@@ -634,83 +636,118 @@ function SignUpPage() {
     return (
         <>
             <Form className="formSubmission">
+                <h1 align="center">Sign Up</h1>
                 {/* The next blocks handle updating the user's form data and errors */}
-                <Form.Group controlId='name'>
-                    <Form.Label>Preferred Name</Form.Label>
-                    <Form.Control
-                        type='text'
-                        value={form.preferred_name}
-                        onChange={(e) => setField('preferred_name', e.target.value)}
-                        isInvalid={!!errors.preferred_name}
-                    ></Form.Control>
+                <Form.Group controlId='preferred_name_group'>
+                    <FloatingLabel
+                        controlId="preferred_name"
+                        label="Preferred Name"
+                        className="mb-3"
+                    >
+                        <Form.Control
+                            htmlFor="preferred_name"
+                            type='text'
+                            value={form.preferred_name}
+                            onChange={(e) => setField('preferred_name', e.target.value)}
+                            isInvalid={!!errors.preferred_name}
+                            placeholder="Preferred Name"
+                        ></Form.Control>
 
-                    {/* If data is invalid, show errors */}
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.preferred_name }
-                    </Form.Control.Feedback>
-
+                        {/* If data is invalid, show errors */}
+                        <Form.Control.Feedback type='invalid'>
+                            { errors.preferred_name }
+                        </Form.Control.Feedback>
+                    </FloatingLabel>
                 </Form.Group>
-                <Form.Group controlId='username'>
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control
-                        type='text'
-                        value={form.username}
-                        onChange={(e) => setField('username', e.target.value)}
-                        isInvalid={!!errors.username}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.username }
-                    </Form.Control.Feedback>
+                <Form.Group controlId='username_group'>
+                    <FloatingLabel
+                        controlId="username"
+                        label="Username"
+                        className="mb-3"
+                    >
+                        <Form.Control
+                            htmlFor="username"
+                            type='text'
+                            value={form.username}
+                            onChange={(e) => setField('username', e.target.value)}
+                            isInvalid={!!errors.username}
+                            placeholder="username"
+                        ></Form.Control>
+                        <Form.Control.Feedback type='invalid'>
+                            { errors.username }
+                        </Form.Control.Feedback>
+                    </FloatingLabel>
                 </Form.Group>
-                <Form.Group controlId='password'>
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                        type='password'
-                        value={form.password}
-                        onChange={(e) => setField('password', e.target.value)}
-                        isInvalid={!!errors.password}
-                    ></Form.Control>
-                    {/* The password field can have multiple errors */}
-                    <Form.Control.Feedback type='invalid'>
-                        { "Password must..." }
-                        { errors.password ?
-                            (
-                              Object.keys(errors.password).map((oneKey, i)=>{
-                                return (
-                                    <li key={i}>{errors.password[oneKey]}</li>
-                                  )
-                              })
-                            ) : null
-                        }
-                    </Form.Control.Feedback>
+                <Form.Group controlId='password_group'>
+                    <FloatingLabel
+                        controlId="password"
+                        label="Password"
+                        className="mb-3"
+                    >
+                        <Form.Control
+                            htmlFor="password"
+                            type='password'
+                            value={form.password}
+                            onChange={(e) => setField('password', e.target.value)}
+                            isInvalid={!!errors.password}
+                            placeholder="password"
+                        ></Form.Control>
+                        {/* The password field can have multiple errors */}
+                        <Form.Control.Feedback type='invalid'>
+                            { "Password must..." }
+                            { errors.password ?
+                                (
+                                  Object.keys(errors.password).map((oneKey, i)=>{
+                                    return (
+                                        <li key={i}>{errors.password[oneKey]}</li>
+                                      )
+                                  })
+                                ) : null
+                            }
+                        </Form.Control.Feedback>
+                    </FloatingLabel>
                     <Form.Text className='text-muted'>
                         Password must be between 8 and 25 characters and contain at least one uppercase letter, one
                         lowercase letter, one special char($%^&*_+=~`|/,;:\!@), and one number.
                     </Form.Text>
                 </Form.Group>
                 <Form.Group controlId='confirm_password'>
-                    <Form.Label>Confirm Password</Form.Label>
-                    <Form.Control
-                        type='password'
-                        value={form.confirm_password}
-                        onChange={(e) => setField('confirm_password', e.target.value)}
-                        isInvalid={!!errors.confirm_password}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.confirm_password }
-                    </Form.Control.Feedback>
+                    <FloatingLabel
+                        controlId="confirm_password"
+                        label="Confirm Password"
+                        className="mb-3"
+                    >
+                        <Form.Control
+                            htmlFor="confirm_password"
+                            type='password'
+                            value={form.confirm_password}
+                            onChange={(e) => setField('confirm_password', e.target.value)}
+                            isInvalid={!!errors.confirm_password}
+                            placeholder="confirm_password"
+                        ></Form.Control>
+                        <Form.Control.Feedback type='invalid'>
+                            { errors.confirm_password }
+                        </Form.Control.Feedback>
+                    </FloatingLabel>
                 </Form.Group>
                 <Form.Group controlId='dob'>
-                    <Form.Label>Date of Birth</Form.Label>
-                    <Form.Control
-                        type='date'
-                        value={form.dob}
-                        onChange={(e) => setField('dob', e.target.value)}
-                        isInvalid={!!errors.dob}
-                    ></Form.Control>
-                    <Form.Control.Feedback type='invalid'>
-                        { errors.dob }
-                    </Form.Control.Feedback>
+                    <FloatingLabel
+                        controlId="date"
+                        label="Date of Birth"
+                        className="mb-3"
+                    >
+                        <Form.Control
+                            htmlFor="dob"
+                            type='date'
+                            value={form.dob}
+                            onChange={(e) => setField('dob', e.target.value)}
+                            isInvalid={!!errors.dob}
+                            placeholder="dob"
+                        ></Form.Control>
+                        <Form.Control.Feedback type='invalid'>
+                            { errors.dob }
+                        </Form.Control.Feedback>
+                    </FloatingLabel>
                 </Form.Group>
 
                 {/* I am using PhoneNumber component Open Source */}
