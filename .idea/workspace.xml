@@ -7,9 +7,15 @@
     <list default="true" id="9acdbc88-a327-4850-bf03-d6c8347fe3a0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/src/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/context/AuthContext.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/context/AuthContext.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/frontend/src/pages/LoginPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/pages/LoginPage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/frontend/src/pages/SignUpPage.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/pages/SignUpPage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/frontend/src/pages/UserHomePage.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/pages/UserHomePage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/frontend/src/utils/Logout.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/frontend/src/utils/Logout.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -1,22 +1,36 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import AuthContext from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify';
+
 
 const Logout = () => {
-    let { setTokens, setUser } = useContext(AuthContext)
-    let navigate = useNavigate()
-    // get user object and tokens and set them to null, remove token from local storage
-    // then navigate to login page
-    let logoutUser = () => {
-        setTokens(null)
-        setUser(null)
-        localStorage.removeItem('tokens')
-        navigate("/login")
+    const { setTokens, setUser, user } = useContext(AuthContext);
+    const navigate = useNavigate();
+    // Initialize the ref to false
+    const isToastShown = useRef(false);
+
+    const logoutUser = () => {
+        setTokens(null);
+        setUser(null);
+        localStorage.removeItem('tokens');
+        navigate('/login');
     }
-    // on load of this component we log the user out
+
     useEffect(() => {
-        logoutUser()
-    }, [])
+        logoutUser();
+        const message = `Logout successful! Goodbye ${user.preferred_name}.`;
+        if (!isToastShown.current) {
+            toast.success(message);
+            // Set the ref to true after showing the toast
+            isToastShown.current = true;
+        }
+        // Add user.preferred_name as a dependency to make sure the effect is triggered on every logout
+    }, [user.preferred_name]);
+
+    // This component doesn't render anything, so return null
+    return null;
 }
+
 
 export default Logout

@@ -5,9 +5,11 @@ import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
+import { toast } from 'react-toastify';
 
 
 const LoginPage = () => {
+
     let {loginUser} = useContext(AuthContext)
     // we have a base form set that will hold all the information from the user to send to the backend when completed
     const [form, setForm] = useState({'username': '', 'password': ''});

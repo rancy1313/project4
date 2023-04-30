@@ -2,7 +2,9 @@ import React, {useState, useEffect, useContext} from 'react'
 import AuthContext from '../context/AuthContext'
 import Alert from 'react-bootstrap/Alert';
 
+
 const HomePage = () => {
+
     // format the phone number
     function setPhoneNumber(phoneNumber) {
       return ["+1 ", '(', phoneNumber.slice(2, 5), ') ', phoneNumber.slice(5, 8), '-', phoneNumber.slice(8, 13)].join('');

@@ -12,6 +12,8 @@ import { Multiselect } from "multiselect-react-dropdown";
 import 'react-phone-number-input/style.css';
 
 import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 function SignUpPage() {
@@ -626,10 +628,11 @@ function SignUpPage() {
                                                 },
                                                 body: JSON.stringify(copy_form)})
 
-
             // we navigate to the login page
-            navigate("/login")
+            navigate('/login');
 
+            // alert user account was created successfully
+            toast.success("Account created!")
         }
     }
 

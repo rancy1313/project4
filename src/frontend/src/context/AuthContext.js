@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from 'react'
 import jwt_decode from "jwt-decode";
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext()
 
@@ -39,6 +40,10 @@ export const AuthProvider = ({children}) => {
             // decode the user data and store it in the local storage then navigate to home
             setUser(jwt_decode(data.access))
             localStorage.setItem('tokens', JSON.stringify(data))
+            // customize the alert for the user with user name
+            const message = `Login successful! Welcome ${jwt_decode(data.access)["preferred_name"]}.`;
+            //toast.success(message);
+            toast.success(message)
             navigate("/")
         }else{
             // else the username/password was incorrect, so set those errors

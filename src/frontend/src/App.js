@@ -10,10 +10,24 @@ import RestrictedRoutes from './utils/RestrictedRoutes'
 import SignUpPage from './pages/SignUpPage'
 import Logout from './utils/Logout'
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
     return (
         <div className="App">
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
             <BrowserRouter>
                 <AuthProvider>
                     {/* Display the navbar */}
