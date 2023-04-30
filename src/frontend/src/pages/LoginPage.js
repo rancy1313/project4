@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, { useContext , useRef, useEffect } from 'react'
 import AuthContext from '../context/AuthContext'
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
@@ -14,6 +14,8 @@ const LoginPage = () => {
     // we have a base form set that will hold all the information from the user to send to the backend when completed
     const [form, setForm] = useState({'username': '', 'password': ''});
     const [errors, setErrors] = useState({});
+    // Initialize the ref to false
+    const isToastShown = useRef(false);
 
     const setField = (field, value) => {
         // just change the field in the form
@@ -29,19 +31,28 @@ const LoginPage = () => {
         })
     }
 
+    // this function is used to trigger useEffect to reset the alert msg
+    // due to how data flows in react we need to cause the error dependency
+    // to trigger after errors.detail is set and then we can display the alert
+    const resetAlert = () => {
+        setErrors(errors);
+    }
+
+    useEffect(() => {
+        // alerts display twice because of rendering so we useRef to make sure it displays once
+        if (!isToastShown.current && errors.detail) {
+            toast.error("No active account found with the given credentials.");
+            // Set the ref to true after showing the toast
+            isToastShown.current = false;
+        }
+    }, [errors])
+
+
     return (
         <div>
             <Form className="formSubmission" onSubmit={(e) => loginUser(e, errors, setErrors)}>
                 <h1 align="center">Login</h1>
-                {/* show error warning if user failed to log in with the correct credentials */}
-                { errors.detail ?
-                    <Alert variant="danger">
-                        <Alert.Heading>Login Error</Alert.Heading>
-                        <p>
-                            { errors.detail }
-                        </p>
-                    </Alert>
-                : null }
+
                 {/* a form that handles the user's username and password */}
                 <Form.Group controlId='username_group'>
                     <FloatingLabel
@@ -85,7 +96,9 @@ const LoginPage = () => {
                     <Button
                         type='submit'
                         className='my-2'
-                        variant='primary'>Sign Up</Button>
+                        variant='primary'
+                        onClick={resetAlert}
+                        >Sign Up</Button>
                 </Form.Group>
             </Form>
         </div>
