@@ -1,9 +1,8 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 
 // botstrap / style imports
 import Button from 'react-bootstrap/Button';
 import Input from 'react-phone-number-input/input'
-import PhoneInput from 'react-phone-number-input';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
@@ -12,13 +11,12 @@ import { Multiselect } from "multiselect-react-dropdown";
 import 'react-phone-number-input/style.css';
 
 import { useNavigate } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 
 function SignUpPage() {
 
-    // set the available allergies to pass in the bootstrap selector
+    // set the available allergies to pass in the Multiselect
     const allergies = ['Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans', 'Sesame'];
 
     // used to trigger handleSubmit
@@ -38,7 +36,7 @@ function SignUpPage() {
 
 
     // we have a base form set that will hold all the information from the user to send to the backend when completed
-    const [form, setForm] = useState({'test': '', 'dob': newDate, 'preferred_name': '', 'username': '', 'password': '',
+    const [form, setForm] = useState({'dob': newDate, 'preferred_name': '', 'username': '', 'password': '',
                                       'confirm_password': '', 'allergies': ['None'], 'phone_number': '',
                                       'user_addresses': {'delivery_address1': {'address_name': '', 'city': '',
                                       'address': '', 'zipcode': ''}}});
@@ -96,7 +94,7 @@ function SignUpPage() {
     function setPhoneNumber(value) {
 
         // the phone number component will return undefined if it becomes empty
-        if (value == undefined)
+        if (value === undefined)
             // so we make sure it get changed to empty string if that happens
             value = "";
 
@@ -412,6 +410,7 @@ function SignUpPage() {
                                                 body: JSON.stringify({"encoded_username": encoded_username,
                                                                       "encoded_phone_number":  encoded_phone_number})})
         let data = await unique_field_request.json();
+
         // validate the form to see if there are any errors.
         // pass backend response to throw errors if needed
         const formErrors = validateForm(data);
@@ -446,6 +445,18 @@ function SignUpPage() {
             newErrors.preferred_name = 'Please enter a preferred name.';
         }
 
+        //  Valid characters are uppercase letters (A-Z), lowercase letters (a-z),
+        //  numbers (0-9), period (.), apostrophe ('), hyphen/dash (-), and spaces.
+        //  No other characters are allowed. - Government
+        const restricted_chars_username = "`~!@#$%^&*()_=+,;:\\|][{}/?><]\"".split("")
+        var diff = restricted_chars_username.filter(char => !preferred_name.includes(char));
+
+        // acceptable $%^&*-_+=~`|/,.;:"'{}[]()!@
+        // if the diff is 30 then no restricted chars were used
+        if (diff.length !== restricted_chars_username.length) {
+            newErrors.preferred_name = ['No special chars are allowed besides period (.), hyphen/dash (-), apostrophe (\'), and spaces.'];
+        }
+
         // username cannot be null
         if (username === '') {
             newErrors.username = 'Please enter a username.';
@@ -456,10 +467,20 @@ function SignUpPage() {
             newErrors.username = 'Username is already taken.';
         }
 
+        // same as preferred_name
+        //restricted_chars_username = "`~!@#$%^&*()_=+,;:\\|][{}/?><]\"".split("")
+        diff = restricted_chars_username.filter(char => !username.includes(char));
+
+        // acceptable $%^&*-_+=~`|/,.;:"'{}[]()!@
+        // if the diff is 30 then no restricted chars were used
+        if (diff.length !== restricted_chars_username.length) {
+            newErrors.username = ['No special chars are allowed besides period (.), hyphen/dash (-), apostrophe (\'), and spaces.'];
+        }
+
         // password must be at least 8 chars and at most 25 chars
         if (8 > password.length || password.length > 25) {
             // this is the first error checked, we can just initialize it
-            newErrors.password = ['Be between 8 and 25 characters.']
+            newErrors.password = ['Be between 8 and 25 characters.'];
         }
 
         // password and confirm password must match
@@ -480,8 +501,8 @@ function SignUpPage() {
 
         // calculate difference to see if no special chars were used
         const acceptable_chars = "$%^&*_+=~`|/,;:!@".split("")
-        const password_set = password.split("")
-        var diff = acceptable_chars.filter(char => !password.includes(char));
+
+        diff = acceptable_chars.filter(char => !password.includes(char));
 
         // acceptable $%^&*-_+=~`|/,.;:"'{}[]()!@
         // if the diff is 29 then no special chars were used
@@ -578,7 +599,7 @@ function SignUpPage() {
         return newErrors;
     }
 
-    function handleSubmit(formErrors) {
+    async function handleSubmit(formErrors) {
 
         // if formErrors errors keys are greater than 0 then there are errors and can't submit form
         if (Object.keys(formErrors).length > 0) {
@@ -621,18 +642,27 @@ function SignUpPage() {
             }
 
             // we send encrypted copy form to the back end
-            const unique_field_request = fetch("http://127.0.0.1:8000/api/submit-user-form/", {
+            const submit_request = await fetch("http://127.0.0.1:8000/api/submit-user-form/", {
                                                  method: "POST",
                                                  headers: {
                                                     'Content-Type': 'application/json'
                                                 },
                                                 body: JSON.stringify(copy_form)})
 
-            // we navigate to the login page
-            navigate('/login');
 
-            // alert user account was created successfully
-            toast.success("Account created!")
+            let data = await submit_request.json();
+
+            // if success exists then alert user account was created and redirect to login page
+            if (data.success) {
+                // we navigate to the login page
+                navigate('/login');
+
+                // alert user account was created successfully
+                toast.success("Account created!")
+            } else {
+                // set errors
+                setErrors(data);
+            }
         }
     }
 
@@ -847,13 +877,12 @@ function SignUpPage() {
                 <p>Allergies</p>
                 <Multiselect onSelect={setAllergies} showArrow options={allergies} isObject={false} />
 
-                <Form.Group>
-                    <Button
-                        type='submit'
-                        onClick={callUseEffect}
-                        className='my-2'
-                        variant='primary'>Sign Up</Button>
-                </Form.Group>
+
+                <Button
+                    type='submit'
+                    onClick={callUseEffect}
+                    className='my-2'
+                    variant='primary'>Sign Up</Button>
 
             </Form>
         </>

@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage'
 import RestrictedRoutes from './utils/RestrictedRoutes'
 import SignUpPage from './pages/SignUpPage'
 import Logout from './utils/Logout'
+import AccountPage from './pages/AccountPage'
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,12 +37,13 @@ function App() {
                     <Routes>
                         {/* Public routes available when user is not logged in */}
                         <Route element={<LoginPage />} path="/login" />
-                        <Route element={<Logout />} path="/logout" />
                         <Route element={<SignUpPage />} path="/signup" />
 
                         {/* Routes only available to users that are logged in */}
                         <Route element={<RestrictedRoutes />}>
                             <Route exact path='/' element={<UserHomePage />} />
+                            <Route element={<Logout />} path="/logout" />
+                            <Route element={<AccountPage />} path="/account" />
                         </Route>
                     </Routes>
                 </AuthProvider>

@@ -1,9 +1,8 @@
-import React, { useContext , useRef, useEffect } from 'react'
+import { useContext , useRef, useEffect } from 'react';
 import AuthContext from '../context/AuthContext'
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import Alert from 'react-bootstrap/Alert';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import { toast } from 'react-toastify';
 
