@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
-# for age calculation
-import datetime
 
 
 # Each user has extra info associated with their account

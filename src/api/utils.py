@@ -87,6 +87,12 @@ def user_data_backend_validation(user_info_form):
 
     # preferred name validation
 
+    if user_info_form["preferred_name"] == "":
+        errors["preferred_name"] = "Preferred name cannot be empty."
+
+    if len(user_info_form["preferred_name"]) > 25:
+        errors["preferred_name"] = "Preferred name must be under 25 characters."
+
     # follows username restricted chars
     # if the length of the difference is lower than the length of the restricted chars set,
     # then that means there are restricted chars in that field
@@ -132,7 +138,73 @@ def user_data_backend_validation(user_info_form):
 def is_base64_encoded(string):
     try:
         # Attempt to decode the string as base64
-        base64.b64decode(string)
+        base64.b64decode(string).decode("utf-8")
         return True
-    except base64.binascii.Error:
+    except (base64.binascii.Error, UnicodeDecodeError):
         return False
+
+
+# this function is to validate the Preferred name and allergies if a user
+# wants to update their personal info
+def validate_user_update_info(user_info_form):
+
+    # hold all possible errors
+    errors = {}
+
+    # username validation
+
+    if user_info_form["username"] == "":
+        errors["username"] = "Username cannot be empty."
+
+    user = User.objects.filter(username=user_info_form['username'])
+
+    if not user:
+        errors["username"] = "Account with that username not found."
+
+    if len(user_info_form["username"]) > 25:
+        errors["username"] = "Username must be under 25 characters."
+
+        """
+            Valid characters are uppercase letters (A-Z), lowercase letters (a-z),
+            numbers (0-9), period (.), apostrophe ('), hyphen/dash (-), and spaces.
+            No other characters are allowed. - Government 
+        """
+
+    # preferred name validation
+    restricted_chars_basic = set("`~!@#$%^&*()_=+,;:\|][{}/?><]\"")
+
+    # if the length of the difference is lower than the length of the restricted chars set,
+    # then that means there are restricted chars in that field
+    if len(restricted_chars_basic - set(user_info_form["username"])) < len(restricted_chars_basic):
+        errors["username"] = "No special chars are allowed besides period (.), hyphen/dash " \
+                             "(-), apostrophe ('), and spaces."
+
+    # preferred name validation
+
+    if user_info_form["preferred_name"] == "":
+        errors["preferred_name"] = "Preferred name cannot be empty."
+
+    if len(user_info_form["preferred_name"]) > 25:
+        errors["preferred_name"] = "Preferred name must be under 25 characters."
+
+    restricted_chars_basic = set("`~!@#$%^&*()_=+,;:\|][{}/?><]\"")
+
+    # if the length of the difference is lower than the length of the restricted chars set,
+    # then that means there are restricted chars in that field
+    if len(restricted_chars_basic - set(user_info_form["preferred_name"])) < len(restricted_chars_basic):
+        errors["preferred_name"] = "No special chars are allowed besides period (.), hyphen/dash " \
+                                   "(-), apostrophe ('), and spaces."
+
+    # allergies validation
+
+    allergies = {'Milk', 'Egg', 'Fish', 'Crustacean Shell Fish', 'Tree Nuts', 'Wheat', 'Peanuts', 'Soybeans',
+                 'Sesame', 'None'}
+
+    # if there are any unique elements from doing the difference, then there is unlisted allergies
+    if len(set(user_info_form["allergies"]) - allergies) > 0:
+        errors["allergies"] = "There appears to be unlisted allergies submitted."
+
+    return errors
+
+
+

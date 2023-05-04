@@ -1,4 +1,4 @@
-import React, { useContext} from 'react';
+import React, { useContext, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
 import Alert from 'react-bootstrap/Alert';
 import SearchDropdown from '../components/SearchDropDown';
@@ -13,6 +13,7 @@ const HomePage = () => {
     }
 
     let { user } = useContext(AuthContext);
+
     // get user data and display it on an alert
     return (
         <div>

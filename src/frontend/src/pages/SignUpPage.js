@@ -37,7 +37,7 @@ function SignUpPage() {
 
     // we have a base form set that will hold all the information from the user to send to the backend when completed
     const [form, setForm] = useState({'dob': newDate, 'preferred_name': '', 'username': '', 'password': '',
-                                      'confirm_password': '', 'allergies': ['None'], 'phone_number': '',
+                                      'confirm_password': '', 'allergies': [], 'phone_number': '',
                                       'user_addresses': {'delivery_address1': {'address_name': '', 'city': '',
                                       'address': '', 'zipcode': ''}}});
 
@@ -468,7 +468,6 @@ function SignUpPage() {
         }
 
         // same as preferred_name
-        //restricted_chars_username = "`~!@#$%^&*()_=+,;:\\|][{}/?><]\"".split("")
         diff = restricted_chars_username.filter(char => !username.includes(char));
 
         // acceptable $%^&*-_+=~`|/,.;:"'{}[]()!@
@@ -616,6 +615,11 @@ function SignUpPage() {
                 if (key !== "user_addresses" && key !== "allergies" && key !== "confirm_password")
                     copy_form[key] = btoa(form[key]);
             });
+
+            // if there are no allergies then push None option
+            if (form.allergies.length === 0) {
+                form.allergies.push("None")
+            }
 
             // encrypt allergies separately
             for (var i = 0; i < form.allergies.length; i++)

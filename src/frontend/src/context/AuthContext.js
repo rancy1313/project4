@@ -7,14 +7,11 @@ const AuthContext = createContext()
 
 export default AuthContext;
 
-
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
     // check if there is a token in the storage to retrieve it else set null
     let [tokens, setTokens] = useState(() => localStorage.getItem('tokens') ? JSON.parse(localStorage.getItem('tokens')) : null)
     // check if we have a token in the storage to get the decoded user data from it
     let [user, setUser] = useState(() => localStorage.getItem('tokens') ? jwt_decode(localStorage.getItem('tokens')) : null)
-    // used to decode the tokens to set user data
-    let [decodedToken, setDecodedToken] = useState(true)
 
     let navigate = useNavigate()
 
@@ -24,12 +21,12 @@ export const AuthProvider = ({children}) => {
 
         // attempt to get token from backend with user data
         let response = await fetch('http://127.0.0.1:8000/api/token/', {
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({'username': e.target.username.value, 'password': e.target.password.value})
-        })
+                                        method:'POST',
+                                        headers:{
+                                            'Content-Type':'application/json'
+                                        },
+                                        body:JSON.stringify({'username': e.target.username.value, 'password': e.target.password.value})
+                                    })
 
         let data = await response.json()
 
@@ -45,23 +42,35 @@ export const AuthProvider = ({children}) => {
             //toast.success(message);
             toast.success(message)
             navigate("/")
-        }else{
+        } else {
             // else the username/password was incorrect, so set those errors
             setErrors(data)
         }
     }
 
-    // check if we have auth tokens. If so set the user info
-    useEffect(()=> {
+    // update tokens on each call from the user
+    let updateTokens = async ()=> {
+        // call the custom refresh route bc we are passing a username
+         let response = await fetch('http://127.0.0.1:8000/api/token/refresh/', {
+                                         method:'POST',
+                                         headers:{
+                                             'Content-Type':'application/json'
+                                         },
+                                        body: JSON.stringify({ 'refresh': tokens?.refresh, 'username': user.username })
+                                     })
 
-        if (tokens) {
-            setUser(jwt_decode(tokens.access))
-        }
+         let data = await response.json()
 
-        // auth tokens are decoded so reset decodedToken
-        setDecodedToken(false)
-
-    }, [tokens, decodedToken])
+         // if the response status is good then set the new tokens
+         if (response.status === 200) {
+             setTokens(data);
+             setUser(jwt_decode(data.access));
+             localStorage.setItem('tokens', JSON.stringify(data));
+         } else {
+            // if there are any errors then logout the user
+             navigate("/logout");
+         }
+     }
 
     // these are the variables/functions that are passed through context
     let contextData = {
@@ -70,11 +79,13 @@ export const AuthProvider = ({children}) => {
         tokens: tokens,
         setTokens: setTokens,
         loginUser: loginUser,
+        updateTokens: updateTokens,
     }
 
     return(
+
         <AuthContext.Provider value={contextData} >
-            {decodedToken ? null : children}
+            { children }
         </AuthContext.Provider>
     )
 }
